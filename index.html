@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Academic Giants Family - Official Holiday Coaching Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- Custom Notification Toast -->
+    <div id="toast-box" class="fixed bottom-5 right-5 z-[100] hidden max-w-sm bg-slate-900 border border-emerald-500/50 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl flex items-start gap-3 transition-all duration-300">
+        <div id="toast-icon" class="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg shrink-0 mt-0.5">
+            <i data-lucide="info" class="w-4 h-4"></i>
+        </div>
+        <div class="flex-1 text-xs leading-relaxed" id="toast-message">Notification</div>
+        <button onclick="hideToast()" class="text-slate-400 hover:text-white p-0.5"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+
+    <!-- Two-Step Double Confirmation Logout Modal -->
+    <div id="logout-modal" class="fixed inset-0 z-[90] hidden bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500/20 text-amber-400 p-2.5 rounded-xl border border-amber-500/30">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <span id="logout-step-badge" class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Confirmation 1 of 2</span>
+                    <h3 id="logout-modal-title" class="text-base font-bold text-white">Confirm Learner Logout</h3>
+                </div>
+            </div>
+            <p id="logout-modal-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Are you sure you want to log out of your Academic Giants secure learner session?
+            </p>
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button onclick="cancelLogout()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer">
+                    Cancel
+                </button>
+                <button id="logout-confirm-btn" onclick="proceedLogoutStep()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-lg transition cursor-pointer">
+                    Yes, Continue (1/2)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Countdown & Status Bar -->
+    <div class="bg-emerald-950/90 border-b border-emerald-500/30 px-4 py-2 text-xs text-emerald-300 flex flex-wrap items-center justify-between gap-2 shadow-sm">
+        <span class="flex items-center gap-1.5 font-medium tracking-wide">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> Starts Dec 7th, 2026 — From UGX 1,500 / Sub / Day (3,000/- Both)
+        </span>
+        <div class="flex items-center gap-2.5 shrink-0">
+            <span id="countdown-timer" class="font-bold text-emerald-400 font-mono">Loading...</span>
+            <span id="active-user-badge" class="bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-md text-[11px] font-semibold">Guest</span>
+            <button id="header-logout-btn" onclick="initiateLogout()" class="hidden bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 px-2.5 py-0.5 rounded-md text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
+                <i data-lucide="log-out" class="w-3 h-3"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Header & Navigation -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-emerald-600 text-white p-2.5 rounded-xl font-extrabold text-sm tracking-wider shadow">AG</div>
+                    <div>
+                        <h1 class="font-black text-sm md:text-base text-white tracking-tight">ACADEMIC GIANTS FAMILY</h1>
+                        <p class="text-[11px] text-emerald-400 font-bold tracking-wider uppercase">EMBRACE THE HOLIDAY STUDY • CHANGE THE GRADES</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto justify-start md:justify-end pb-1 md:pb-0 no-scrollbar">
+                <button onclick="switchTab('home')" id="nav-home" class="tab-btn px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white transition flex items-center gap-1.5 shadow shrink-0 cursor-pointer">
+                    <i data-lucide="home" class="w-4 h-4"></i> Overview
+                </button>
+                <button onclick="switchTab('syllabus')" id="nav-syllabus" class="tab-btn px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i data-lucide="book-open" class="w-4 h-4 text-emerald-400"></i> Syllabus
+                </button>
+                <button onclick="switchTab('portal')" id="nav-portal" class="tab-btn px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i data-lucide="calendar-check" class="w-4 h-4 text-emerald-400"></i> Booking
+                </button>
+                <button onclick="switchTab('ai')" id="nav-ai" class="tab-btn px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i> AI Tutor
+                </button>
+                <button onclick="switchTab('admin')" id="nav-admin" class="tab-btn px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i data-lucide="lock" class="w-4 h-4 text-amber-400"></i> Admin
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+        <!-- TAB 1: OVERVIEW -->
+        <div id="tab-home" class="space-y-6">
+            <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/50 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+                <div class="relative z-10 space-y-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="bg-emerald-500/10 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/20 uppercase tracking-widest inline-block">
+                            O-Level (S.4 / Current S.3's) & A-Level (S.5 Vacists & S.6 Learners)
+                        </span>
+                        <span class="bg-amber-500/10 text-amber-400 text-xs font-extrabold px-3 py-1 rounded-full border border-amber-500/30 uppercase tracking-wider inline-block">
+                            An A is Assured and a Must!
+                        </span>
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">Where Both Theories and Practicals Are Digested & Mastered!</h2>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-3xl">
+                        Welcome to the <strong>Academic Giants Family</strong> Holiday Study & Revision Program in <strong>Biology & Chemistry</strong>. Perfect for the current <strong>O-Level (S.4 / S.3)</strong> as well as <strong>A-Level (S.5 Holiday Vacists & S.6)</strong>! Come and we shape your Biology and Chemistry — <em>Trusted for generations</em>.
+                    </p>
+                    <div class="flex flex-wrap gap-3 pt-2">
+                        <button onclick="switchTab('portal')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition text-sm shadow-lg shadow-emerald-600/30 flex items-center gap-2 cursor-pointer">
+                            <i data-lucide="calendar-check" class="w-4 h-4"></i> Book Session Now
+                        </button>
+                        <button onclick="switchTab('syllabus')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-6 py-3 rounded-xl transition text-sm border border-slate-700 cursor-pointer">
+                            View Official Syllabus
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-2.5 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">O-Level Track</span>
+                        <span class="text-xs text-slate-400 font-mono">S.4's (Current S.3's)</span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-extrabold text-white">Ultimate O-Level Biology & Chemistry Revision</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Complete topic digestion, hands-on O-Level laboratory practicals, mole calculations, Section B mastery, and competency-based item interpretation.
+                    </p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-2.5 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">A-Level Track</span>
+                        <span class="text-xs text-slate-400 font-mono">S.5 Vacists & S.6</span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-extrabold text-white">Advanced Biology (P530) & Chemistry (P525)</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        In-depth Physical, Organic & Inorganic Chemistry, Biology constructs, dissection, physiology, microscopy, and UNEB answering techniques.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-md">
+                    <div class="text-emerald-400 font-extrabold text-lg">For As Low As 3,000/-</div>
+                    <h3 class="font-bold text-white text-sm">Per Day (UGX 1,500 / Subject)</h3>
+                    <p class="text-xs text-slate-400">Affordable daily rates (UGX 1,500 per subject/day or 3,000/- for both) and flexible weekly passes.</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-md">
+                    <div class="text-emerald-400 font-extrabold text-lg">Lab & Practicals</div>
+                    <h3 class="font-bold text-white text-sm">Digested & Mastered</h3>
+                    <p class="text-xs text-slate-400">Master volumetric titration, organic/inorganic practicals, microscopy, and dissections.</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-md">
+                    <div class="text-emerald-400 font-extrabold text-lg">Expert Tutors</div>
+                    <h3 class="font-bold text-white text-sm">Distinguished Faculty</h3>
+                    <p class="text-xs text-slate-400">Led by Tr. Surgeon, Tr. Hamdan, Mr. Moore, Mr. Kakeeto, Mr. Geofrey, Mr. Kiyingi, Madam Miracle & Team.</p>
+                </div>
+            </div>
+
+            <div class="bg-sky-950/30 border border-sky-500/30 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="bg-sky-500 text-slate-950 p-3 rounded-xl font-bold shrink-0">
+                        <i data-lucide="send" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-sm sm:text-base">Join the Academic Giants Telegram & Direct Contacts</h4>
+                        <p class="text-xs text-slate-300">Daily notes at <span class="text-sky-400 font-mono font-bold">t.me/academicgiants</span> • Call/WhatsApp: <span class="text-emerald-400 font-mono font-bold">0751341896</span> or <span class="text-emerald-400 font-mono font-bold">0759203256</span></p>
+                    </div>
+                </div>
+                <a href="https://t.me/academicgiants" target="_blank" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs transition shrink-0 w-full sm:w-auto text-center shadow">Open Telegram</a>
+            </div>
+        </div>
+
+        <!-- TAB 2: SYLLABUS -->
+        <div id="tab-syllabus" class="hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
+                <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <span class="text-xs font-extrabold text-emerald-400 uppercase tracking-widest">Academic Holiday Study & Revision Program</span>
+                        <h2 class="text-xl sm:text-2xl font-black text-white mt-1">BIOLOGY & CHEMISTRY OFFICIAL SYLLABUS</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">For S.4's (Current S.3's), S.5 (S.4 Holiday Vacists) & S.6 Learners — <em>Where Both Theories and Practicals Are Digested & Mastered!</em></p>
+                    </div>
+                    <span class="bg-amber-500/15 text-amber-300 border border-amber-500/30 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wide shrink-0 self-start sm:self-center">
+                        An A is Assured and a Must
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-950 border border-emerald-500/30 rounded-2xl p-6 space-y-4 shadow-lg">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-amber-500/20 text-amber-400 p-1.5 rounded-lg border border-amber-500/30">
+                                    <i data-lucide="award" class="w-4 h-4"></i>
+                                </span>
+                                <h3 class="font-black text-amber-400 text-sm sm:text-base tracking-wide">S.4'S (ULTIMATE REVISION)</h3>
+                            </div>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-md font-bold">O-Level</span>
+                        </div>
+                        <ul class="space-y-3 text-xs sm:text-sm text-slate-200 font-medium">
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>All Biology & Chemistry Topics Explained</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>All Biology & Chemistry Practicals</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>How to Interpret & Respond to Biology & Chemistry Items</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>How to Tackle Mole Calculations</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>How to Answer Section B</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+                                <span class="italic text-emerald-300 font-semibold">...and much more!</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-950 border border-emerald-500/30 rounded-2xl p-6 space-y-4 shadow-lg">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg border border-emerald-500/30">
+                                    <i data-lucide="award" class="w-4 h-4"></i>
+                                </span>
+                                <h3 class="font-black text-emerald-400 text-sm sm:text-base tracking-wide">S.5 & S.6 STUDY PROGRAM</h3>
+                            </div>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-md font-bold">A-Level</span>
+                        </div>
+                        <ul class="space-y-3 text-xs sm:text-sm text-slate-200 font-medium">
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span><strong>CHEMISTRY:</strong> Physical, Organic & Inorganic</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span><strong>BIOLOGY:</strong> All Constructs, Dissection & Physiology</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>Microscopy</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>Organic, Physical & Inorganic Practicals</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>Tips & Techniques of Answering & Interpretation</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>What to NEVER Leave Out when Answering</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-emerald-950 via-slate-950 to-emerald-950 border border-emerald-500/30 rounded-2xl p-5 text-center space-y-2">
+                    <span class="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Perfect for the Current S4, S5 & S6!
+                    </span>
+                    <h4 class="text-base sm:text-xl font-black text-white tracking-tight uppercase">
+                        Come and We Shape Your Biology and Chemistry — Trusted for Generations
+                    </h4>
+                    <p class="text-xs text-slate-300">
+                        For more details Call/WhatsApp: <strong class="text-emerald-400 font-mono">0751341896</strong> or <strong class="text-emerald-400 font-mono">0759203256</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: BOOKING PORTAL -->
+        <div id="tab-portal" class="hidden space-y-6">
+            <!-- Auth Selection / Login / Register Card -->
+            <div id="auth-card" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl max-w-xl mx-auto space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Secure Learner Portal</span>
+                        <h2 id="auth-main-title" class="text-xl font-bold text-white mt-0.5">Learner Authentication</h2>
+                    </div>
+                    <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+                        <button onclick="switchAuthMode('login')" id="auth-mode-login-btn" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white transition cursor-pointer">Login</button>
+                        <button onclick="switchAuthMode('register')" id="auth-mode-register-btn" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">Register</button>
+                    </div>
+                </div>
+
+                <!-- Returning Learner Login Form -->
+                <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                    <p class="text-xs text-slate-400">Enter your WhatsApp phone number and your Private Secret Access Code to access your isolated account.</p>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">WhatsApp Phone Number</label>
+                        <input type="tel" id="login-phone" required placeholder="077XXXXXXXX" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Private Secret Access Code</label>
+                        <input type="password" id="login-passcode" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono tracking-widest">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer">
+                        <i data-lucide="log-in" class="w-4 h-4"></i> Access Secure Account
+                    </button>
+                </form>
+
+                <!-- New Learner Registration Form -->
+                <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                    <p class="text-xs text-slate-400">Create your private Academic Giants learner account. Keep your Secret Access Code safe and private!</p>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Group or Full Name</label>
+                        <input type="text" id="reg-name" required placeholder="e.g. Namukasa Joan" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Class Level</label>
+                            <select id="reg-class" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
+                                <option value="S.4 (Current S.3)">O-Level: S.4's (Current S.3's)</option>
+                                <option value="S.5 (S.4 Vacist)">A-Level: S.5 (S.4 Holiday Vacists)</option>
+                                <option value="S.6" selected>A-Level: Senior Six (S.6)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">WhatsApp Phone Number</label>
+                            <input type="tel" id="reg-phone" required placeholder="077XXXXXXXX" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">School Name</label>
+                        <input type="text" id="reg-school" required placeholder="e.g. Kabuwoko S.S / Kinoni Integrated" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Create Private Secret Access Code</label>
+                        <input type="password" id="reg-passcode" required placeholder="Create a secure code (e.g. 4-8 digits)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono tracking-widest">
+                        <p class="text-[10px] text-amber-400 mt-1">⚠️ Keep this code safe and private. You will need it to login to your account.</p>
+                    </div>
+
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i> Register & Open Account
+                    </button>
+                </form>
+            </div>
+
+            <!-- Authenticated Learner Dashboard -->
+            <div id="booking-section" class="hidden space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs bg-emerald-500/10 text-emerald-400 font-bold px-2.5 py-1 rounded-md border border-emerald-500/20 flex items-center gap-1">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Secure Private Account
+                            </span>
+                            <span id="student-class-pill" class="text-xs bg-slate-800 text-slate-300 font-semibold px-2.5 py-1 rounded-md">S.6</span>
+                            <span id="student-verification-badge" class="text-[10px] bg-amber-500/20 text-amber-400 font-bold px-2.5 py-0.5 rounded-md border border-amber-500/30">Pending Confirmation</span>
+                        </div>
+                        <h2 id="welcome-student-title" class="text-base sm:text-lg font-bold text-white mt-1.5">Welcome</h2>
+                        <p class="text-xs text-slate-400">Configure your subjects, schedule, and attendance plan below.</p>
+                    </div>
+                    <button onclick="initiateLogout()" class="text-xs bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 px-4 py-2.5 rounded-xl border border-rose-500/30 transition shrink-0 font-bold flex items-center gap-1.5 cursor-pointer">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Logout Account
+                    </button>
+                </div>
+
+                <!-- Live In-App Confirmation Notification Banner -->
+                <div id="learner-notification-banner" class="hidden bg-emerald-950/80 border border-emerald-500/50 rounded-2xl p-5 space-y-2 shadow-xl animate-pulse">
+                    <div class="flex items-center gap-2.5 text-emerald-300 font-extrabold text-sm">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i> Official Confirmation Notice
+                    </div>
+                    <p id="learner-notification-text" class="text-xs text-emerald-200 leading-relaxed">
+                        Congratulations! Your Academic Giants learner account and sessions have been officially verified and confirmed by the administration. Welcome aboard!
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Step 2 of 3</span>
+                            <h3 class="text-base font-bold text-white mt-1">Select Subjects & Schedule</h3>
+                            <p class="text-xs text-slate-400">UGX 1,500 per subject per day (UGX 3,000/day for both).</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300">1. Select Subject Track</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button type="button" onclick="setSubject('Biology (P530)')" id="sub-bio" class="subj-btn p-3 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-bold text-xs text-center transition cursor-pointer">Biology</button>
+                                <button type="button" onclick="setSubject('Chemistry (P525)')" id="sub-chem" class="subj-btn p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold text-xs text-center transition cursor-pointer">Chemistry</button>
+                                <button type="button" onclick="setSubject('Both Bio & Chem')" id="sub-both" class="subj-btn p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold text-xs text-center transition cursor-pointer">Both (3,000/-)</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300">2. Attendance Plan (Mon–Sat)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div onclick="setPlan('daily')" id="plan-daily" class="plan-card p-4 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-bold text-xs text-white">Daily Pass</span>
+                                        <span class="text-xs text-slate-400 font-mono">1,500/sub/day</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400">Select specific days.</p>
+                                </div>
+                                <div onclick="setPlan('weekly')" id="plan-weekly" class="plan-card p-4 rounded-xl border border-emerald-500 bg-emerald-500/10 cursor-pointer transition">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-bold text-xs text-emerald-400">Weekly Pass</span>
+                                        <span class="text-xs text-emerald-400 font-bold font-mono">UGX 9,000/sub</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400">Full 6-day coverage.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="daily-days-box" class="space-y-2 hidden">
+                            <label class="block text-xs font-semibold text-slate-300">Select Specific Days</label>
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                <button type="button" onclick="toggleDay('Monday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Mon</button>
+                                <button type="button" onclick="toggleDay('Tuesday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Tue</button>
+                                <button type="button" onclick="toggleDay('Wednesday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Wed</button>
+                                <button type="button" onclick="toggleDay('Thursday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Thu</button>
+                                <button type="button" onclick="toggleDay('Friday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Fri</button>
+                                <button type="button" onclick="toggleDay('Saturday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Sat</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300">3. Select Time Slots (Strictly Maximum 2)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div onclick="toggleSlot('Morning (8:00 AM – 11:00 AM)', this)" id="slot-Morning" class="slot-card p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition">
+                                    <p class="font-bold text-xs text-white">Morning Session</p>
+                                    <p class="text-[11px] text-slate-400">8:00 AM – 11:00 AM</p>
+                                </div>
+                                <div onclick="toggleSlot('Afternoon (2:00 PM – 5:00 PM)', this)" id="slot-Afternoon" class="slot-card p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition">
+                                    <p class="font-bold text-xs text-white">Afternoon Session</p>
+                                    <p class="text-[11px] text-slate-400">2:00 PM – 5:00 PM</p>
+                                </div>
+                                <div onclick="toggleSlot('Evening (5:30 PM – 8:00 PM)', this)" id="slot-Evening" class="slot-card p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition">
+                                    <p class="font-bold text-xs text-white">Evening Session</p>
+                                    <p class="text-[11px] text-slate-400">5:30 PM – 8:00 PM</p>
+                                </div>
+                                <div onclick="toggleSlot('Night (8:30 PM – 10:30 PM)', this)" id="slot-Night" class="slot-card p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition">
+                                    <p class="font-bold text-xs text-white">Night Session</p>
+                                    <p class="text-[11px] text-slate-400">8:30 PM – 10:30 PM</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Step 3 of 3</span>
+                            <h3 class="text-base font-bold text-white mt-1">Payment & WhatsApp Booking</h3>
+                            <p class="text-xs text-slate-400">Choose coordinator and complete USSD payment.</p>
+                        </div>
+
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2.5">
+                            <div class="flex justify-between text-xs text-slate-300">
+                                <span id="summary-subject" class="font-semibold">Biology (P530)</span>
+                                <span id="summary-plan" class="font-bold text-emerald-400">Weekly Pass</span>
+                            </div>
+                            <div class="flex justify-between text-xs text-slate-300">
+                                <span>Slots:</span>
+                                <span id="summary-slots" class="font-semibold text-white truncate max-w-[160px]">None</span>
+                            </div>
+                            <div class="border-t border-slate-800 pt-2.5 flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-300">Total Fee:</span>
+                                <span id="summary-fee" class="text-base font-extrabold text-emerald-400 font-mono">UGX 9,000</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Send Booking Via WhatsApp To:</label>
+                                <select id="target-coordinator" onchange="syncPaymentCoordinator()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 font-bold">
+                                    <option value="256751341896">Tr. Surgeon (0751341896)</option>
+                                    <option value="256759203256">Tr. Hamdan (0759203256)</option>
+                                </select>
+                            </div>
+
+                            <!-- Synchronized Airtel Money USSD Payment Buttons -->
+                            <div class="space-y-2 pt-1">
+                                <label class="block text-xs font-semibold text-slate-300">Pay via Airtel Money USSD (Click to Dial):</label>
+                                <div class="grid grid-cols-1 gap-2">
+                                    <a id="ussd-btn-1" href="#" onclick="handleDialPayment('256751341896', event)" class="ussd-pay-btn bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between shadow cursor-pointer">
+                                        <span class="flex items-center gap-2"><i data-lucide="phone-call" class="w-4 h-4"></i> Pay on 0751341896</span>
+                                        <span id="ussd-text-1" class="font-mono bg-emerald-950 px-2 py-1 rounded text-[11px]">Dialing...</span>
+                                    </a>
+                                    <a id="ussd-btn-2" href="#" onclick="handleDialPayment('256759203256', event)" class="ussd-pay-btn bg-slate-800 text-slate-500 font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between opacity-50 cursor-not-allowed">
+                                        <span class="flex items-center gap-2"><i data-lucide="phone-call" class="w-4 h-4"></i> Pay on 0759203256</span>
+                                        <span id="ussd-text-2" class="font-mono bg-slate-950 px-2 py-1 rounded text-[11px]">Locked</span>
+                                    </a>
+                                </div>
+                                <p class="text-[10px] text-slate-400">💡 Clicking the matching button opens your phone dialer with the USSD code pre-filled. Just insert your PIN and confirm!</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">MoMo Transaction ID</label>
+                                <input type="text" id="momo-tx" required placeholder="e.g. TXN987654321" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500">
+                            </div>
+
+                            <button onclick="submitBooking()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer">
+                                <i data-lucide="send" class="w-4 h-4"></i> Dispatch Booking to WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: AI TUTOR -->
+        <div id="tab-ai" class="hidden space-y-5 max-w-3xl mx-auto">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between">
+                <div>
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="bot" class="w-5 h-5 text-emerald-400"></i> SURGEON AI Academic & Research Tutor
+                    </h2>
+                    <p class="text-xs text-slate-400">Ask O-Level or A-Level Biology & Chemistry questions for first-principles explanations.</p>
+                </div>
+                <span class="text-xs bg-emerald-500/10 text-emerald-400 font-bold px-3 py-1 rounded-full border border-emerald-500/20">Online</span>
+            </div>
+
+            <div id="chat-messages" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 h-96 overflow-y-auto space-y-4 shadow-inner text-xs sm:text-sm">
+                <div class="flex items-start gap-3">
+                    <div class="bg-emerald-600 text-white p-2 rounded-xl font-bold text-xs">AI</div>
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-slate-200 text-xs sm:text-sm leading-relaxed max-w-[85%] shadow-sm">
+                        Greetings! I am <strong>SURGEON AI</strong>, your research and revision assistant for <strong>O-Level (S.4)</strong> and <strong>A-Level (S.5 & S.6) Biology & Chemistry</strong>. <strong>Embrace the holiday study</strong> and <strong>change the grades</strong>! Ask me any science question or inquiry about our sessions!
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <input type="text" id="chat-input" onkeypress="if(event.key==='Enter') sendAiMessage()" placeholder="Ask a Biology or Chemistry research question..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-xs sm:text-sm text-white focus:outline-none focus:border-emerald-500">
+                <button onclick="sendAiMessage()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition text-xs sm:text-sm shrink-0 shadow cursor-pointer">Send</button>
+            </div>
+        </div>
+
+        <!-- TAB 5: ADMIN (PASSWORD HASH OBSCURED) -->
+        <div id="tab-admin" class="hidden space-y-6 max-w-4xl mx-auto">
+            <div id="admin-lock" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 sm:p-10 text-center space-y-4 shadow-2xl max-w-lg mx-auto">
+                <div class="bg-slate-800 text-amber-400 w-12 h-12 rounded-full flex items-center justify-center mx-auto border border-slate-700 shadow-inner">
+                    <i data-lucide="lock" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Restricted Coordinator Access</h3>
+                <p class="text-xs text-slate-400 max-w-md mx-auto">Enter your secure Administrator PIN to access the student database and confirmed bookings.</p>
+                <div class="flex gap-3 max-w-sm mx-auto pt-2">
+                    <input type="password" id="admin-pin" onkeypress="if(event.key==='Enter') verifyAdmin()" placeholder="••••" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white text-center tracking-widest focus:outline-none focus:border-emerald-500 font-mono">
+                    <button onclick="verifyAdmin()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm transition shadow cursor-pointer">Authorize</button>
+                </div>
+            </div>
+
+            <div id="admin-content" class="hidden space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Learners Registered</p>
+                        <h4 id="stat-logins" class="text-2xl sm:text-3xl font-black text-white mt-1">0</h4>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Bookings Submitted</p>
+                        <h4 id="stat-bookings" class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">0</h4>
+                    </div>
+                </div>
+
+                <!-- Learners Database Table -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i> Student Logins & Registration Database
+                        </h3>
+                        <span class="text-xs text-slate-400">Manage confirmation & records</span>
+                    </div>
+                    <div class="overflow-x-auto max-h-64">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0 font-semibold">
+                                <tr>
+                                    <th class="p-3">Name</th>
+                                    <th class="p-3">Class & School</th>
+                                    <th class="p-3">Phone</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logins-table-body" class="divide-y divide-slate-800">
+                                <tr><td colspan="5" class="p-4 text-center text-slate-500">Loading records...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bookings Database Table -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-400"></i> Confirmed Bookings & Payments
+                        </h3>
+                        <span class="text-xs text-slate-400">Verify transactions</span>
+                    </div>
+                    <div class="overflow-x-auto max-h-64">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0 font-semibold">
+                                <tr>
+                                    <th class="p-3">Student</th>
+                                    <th class="p-3">Subject & Plan</th>
+                                    <th class="p-3">Fee & TxID</th>
+                                    <th class="p-3">Coordinator</th>
+                                    <th class="p-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookings-table-body" class="divide-y divide-slate-800">
+                                <tr><td colspan="5" class="p-4 text-center text-slate-500">Loading bookings...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-400 space-y-1.5">
+        <p><strong>ACADEMIC GIANTS FAMILY</strong> &copy; 2026 | Embrace the Holiday Study • Change the Grades</p>
+        <p>Tutors: Tr. Surgeon, Tr. Hamdan, Mr. Moore, Mr. Kakeeto, Mr. Geofrey, Mr. Kiyingi, Madam Miracle & Team</p>
+        <p>For More Details Call/WhatsApp: 0751341896 or 0759203256 | Telegram: <a href="https://t.me/academicgiants" target="_blank" class="text-sky-400 hover:underline">t.me/academicgiants</a></p>
+    </footer>
+
+    <!-- Application Script Logic -->
+    <script>
+        lucide.createIcons();
+
+        let toastTimeout = null;
+        function showToast(msg, type = 'info') {
+            const box = document.getElementById('toast-box');
+            const textEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+            textEl.innerText = msg;
+
+            if (type === 'error') {
+                box.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-slate-900 border border-rose-500/60 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl flex items-start gap-3";
+                iconEl.className = "bg-rose-500/20 text-rose-400 p-1.5 rounded-lg shrink-0 mt-0.5";
+            } else {
+                box.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-slate-900 border border-emerald-500/60 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl flex items-start gap-3";
+                iconEl.className = "bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg shrink-0 mt-0.5";
+            }
+            box.classList.remove('hidden');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => hideToast(), 4000);
+        }
+
+        function hideToast() {
+            document.getElementById('toast-box').classList.add('hidden');
+        }
+
+        // SHA-256 Hashing utility for Secret Access Codes & Hidden Admin Password Hash
+        async function hashString(message) {
+            const msgUint8 = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Pre-computed SHA-256 hash for admin password '2017' (Never displayed or stored in plain text)
+        const _adminTargetHash = "9746e0388f6c4c519aa9a175f7956cfefea88ae82dfc7ea9ef8f2f4585c4a757";
+
+        async function verifyAdmin() {
+            const inputPin = document.getElementById('admin-pin').value;
+            const inputHash = await hashString(inputPin);
+            if (inputHash === _adminTargetHash) {
+                document.getElementById('admin-lock').classList.add('hidden');
+                document.getElementById('admin-content').classList.remove('hidden');
+                loadAdminData();
+                showToast("Coordinator access authorized.");
+            } else {
+                showToast("Incorrect Administrator PIN.", "error");
+            }
+        }
+
+        let currentUser = null;
+        let currentPhoneKey = null;
+        let bookingState = {
+            subject: 'Biology (P530)',
+            plan: 'weekly',
+            days: [],
+            slots: []
+        };
+
+        // Two-Step Double Confirmation Logout Logic
+        let logoutStep = 0;
+        function initiateLogout() {
+            if (!currentUser) return;
+            logoutStep = 1;
+            const modal = document.getElementById('logout-modal');
+            document.getElementById('logout-step-badge').innerText = "Confirmation 1 of 2";
+            document.getElementById('logout-step-badge').className = "text-[10px] font-bold uppercase tracking-wider text-amber-400";
+            document.getElementById('logout-modal-title').innerText = "Confirm Learner Logout";
+            document.getElementById('logout-modal-desc').innerText = `Are you sure you want to log out of ${currentUser.name}'s secure account session?`;
+            const confirmBtn = document.getElementById('logout-confirm-btn');
+            confirmBtn.innerText = "Yes, Continue (1/2)";
+            confirmBtn.className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-lg transition cursor-pointer";
+            modal.classList.remove('hidden');
+        }
+
+        function proceedLogoutStep() {
+            if (logoutStep === 1) {
+                logoutStep = 2;
+                document.getElementById('logout-step-badge').innerText = "Final Confirmation (2 of 2)";
+                document.getElementById('logout-step-badge').className = "text-[10px] font-bold uppercase tracking-wider text-rose-400";
+                document.getElementById('logout-modal-title').innerText = "Final Confirmation Required";
+                document.getElementById('logout-modal-desc').innerText = "Please confirm a second time: Logging out will clear your secure session on this device. Proceed?";
+                const confirmBtn = document.getElementById('logout-confirm-btn');
+                confirmBtn.innerText = "Confirm Logout Now (2/2)";
+                confirmBtn.className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-lg transition cursor-pointer";
+            } else if (logoutStep === 2) {
+                executeLogout();
+            }
+        }
+
+        function cancelLogout() {
+            logoutStep = 0;
+            document.getElementById('logout-modal').classList.add('hidden');
+        }
+
+        function executeLogout() {
+            logoutStep = 0;
+            document.getElementById('logout-modal').classList.add('hidden');
+            currentUser = null;
+            currentPhoneKey = null;
+            localStorage.removeItem('ag_student_session');
+            document.getElementById('booking-section').classList.add('hidden');
+            document.getElementById('auth-card').classList.remove('hidden');
+            document.getElementById('active-user-badge').innerText = "Guest";
+            document.getElementById('header-logout-btn').classList.add('hidden');
+            showToast("You have been securely logged out.");
+        }
+
+        // Countdown Timer to December 7th, 2026
+        function updateCountdown() {
+            const targetDate = new Date('December 7, 2026 08:00:00').getTime();
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                document.getElementById('countdown-timer').innerText = "PROGRAM LIVE!";
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('countdown-timer').innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedSession = localStorage.getItem('ag_student_session');
+            if (savedSession) {
+                try {
+                    currentUser = JSON.parse(savedSession);
+                    currentPhoneKey = currentUser.phoneKey;
+                    applyLoggedInUI();
+                    startSessionPolling();
+                } catch (e) {
+                    localStorage.removeItem('ag_student_session');
+                }
+            }
+            syncPaymentCoordinator();
+        });
+
+        function switchAuthMode(mode) {
+            if (mode === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-register').classList.add('hidden');
+                document.getElementById('auth-mode-login-btn').className = "px-3 py-1.5 rounded-lg bg-emerald-600 text-white transition cursor-pointer";
+                document.getElementById('auth-mode-register-btn').className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer";
+                document.getElementById('auth-main-title').innerText = "Returning Learner Login";
+            } else {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+                document.getElementById('auth-mode-login-btn').className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer";
+                document.getElementById('auth-mode-register-btn').className = "px-3 py-1.5 rounded-lg bg-emerald-600 text-white transition cursor-pointer";
+                document.getElementById('auth-main-title').innerText = "New Learner Registration";
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const cls = document.getElementById('reg-class').value;
+            const phone = document.getElementById('reg-phone').value.trim();
+            const school = document.getElementById('reg-school').value.trim();
+            const passcode = document.getElementById('reg-passcode').value.trim();
+
+            if (!phone || !passcode) {
+                showToast("Please provide both phone number and a private access code.", "error");
+                return;
+            }
+
+            const phoneKey = phone.replace(/\D/g, '');
+            const passHash = await hashString(phoneKey + "_" + passcode);
+
+            let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+            if (allLearners.some(l => l.phoneKey === phoneKey)) {
+                showToast("An account with this phone number already exists. Please login instead.", "error");
+                switchAuthMode('login');
+                return;
+            }
+
+            currentUser = {
+                name,
+                cls,
+                phone,
+                school,
+                phoneKey,
+                passHash,
+                confirmed: false,
+                timestamp: new Date().toLocaleString()
+            };
+
+            allLearners.push(currentUser);
+            localStorage.setItem('ag_all_learners', JSON.stringify(allLearners));
+            localStorage.setItem('ag_student_session', JSON.stringify(currentUser));
+            currentPhoneKey = phoneKey;
+
+            applyLoggedInUI();
+            startSessionPolling();
+            showToast(`Account created successfully! Welcome, ${name}.`);
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const phone = document.getElementById('login-phone').value.trim();
+            const passcode = document.getElementById('login-passcode').value.trim();
+            const phoneKey = phone.replace(/\D/g, '');
+            const passHash = await hashString(phoneKey + "_" + passcode);
+
+            let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+            let matched = allLearners.find(l => l.phoneKey === phoneKey && l.passHash === passHash);
+
+            if (!matched) {
+                showToast("Invalid phone number or private access code. Access denied.", "error");
+                return;
+            }
+
+            currentUser = matched;
+            currentPhoneKey = phoneKey;
+            localStorage.setItem('ag_student_session', JSON.stringify(currentUser));
+
+            applyLoggedInUI();
+            startSessionPolling();
+            showToast(`Welcome back, ${currentUser.name}!`);
+        }
+
+        function applyLoggedInUI() {
+            if (!currentUser) return;
+            document.getElementById('auth-card').classList.add('hidden');
+            document.getElementById('booking-section').classList.remove('hidden');
+            document.getElementById('welcome-student-title').innerText = `Welcome, ${currentUser.name}`;
+            document.getElementById('student-class-pill').innerText = currentUser.cls;
+            document.getElementById('active-user-badge').innerText = currentUser.name;
+            document.getElementById('header-logout-btn').classList.remove('hidden');
+
+            const badge = document.getElementById('student-verification-badge');
+            const banner = document.getElementById('learner-notification-banner');
+            if (currentUser.confirmed) {
+                badge.innerText = "Officially Confirmed ✓";
+                badge.className = "text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2.5 py-0.5 rounded-md border border-emerald-500/30";
+                banner.classList.remove('hidden');
+            } else {
+                badge.innerText = "Pending Confirmation";
+                badge.className = "text-[10px] bg-amber-500/20 text-amber-400 font-bold px-2.5 py-0.5 rounded-md border border-amber-500/30";
+                banner.classList.add('hidden');
+            }
+            updateSummary();
+            updateUssdPaymentLinks();
+        }
+
+        function startSessionPolling() {
+            if (!currentPhoneKey) return;
+            setInterval(() => {
+                let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+                let me = allLearners.find(l => l.phoneKey === currentPhoneKey);
+                if (me && me.confirmed !== currentUser.confirmed) {
+                    currentUser.confirmed = me.confirmed;
+                    localStorage.setItem('ag_student_session', JSON.stringify(currentUser));
+                    applyLoggedInUI();
+                }
+            }, 3000);
+        }
+
+        function switchTab(tabId) {
+            ['home', 'syllabus', 'portal', 'ai', 'admin'].forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+                const navBtn = document.getElementById('nav-' + t);
+                if (navBtn) navBtn.className = "tab-btn px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5 shrink-0 cursor-pointer";
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            const activeNav = document.getElementById('nav-' + tabId);
+            if (activeNav) activeNav.className = "tab-btn px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white transition flex items-center gap-1.5 shadow shrink-0 cursor-pointer";
+            lucide.createIcons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setSubject(sub) {
+            bookingState.subject = sub;
+            document.querySelectorAll('.subj-btn').forEach(b => {
+                b.className = "subj-btn p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold text-xs text-center transition cursor-pointer";
+            });
+            if (sub === 'Biology (P530)') document.getElementById('sub-bio').className = "subj-btn p-3 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-bold text-xs text-center transition cursor-pointer";
+            if (sub === 'Chemistry (P525)') document.getElementById('sub-chem').className = "subj-btn p-3 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-bold text-xs text-center transition cursor-pointer";
+            if (sub === 'Both Bio & Chem') document.getElementById('sub-both').className = "subj-btn p-3 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-bold text-xs text-center transition cursor-pointer";
+            updateSummary();
+        }
+
+        function setPlan(plan) {
+            bookingState.plan = plan;
+            document.querySelectorAll('.plan-card').forEach(c => {
+                c.className = "plan-card p-4 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition";
+            });
+            if (plan === 'daily') {
+                document.getElementById('plan-daily').className = "plan-card p-4 rounded-xl border border-emerald-500 bg-emerald-500/10 cursor-pointer transition";
+                document.getElementById('daily-days-box').classList.remove('hidden');
+            } else {
+                document.getElementById('plan-weekly').className = "plan-card p-4 rounded-xl border border-emerald-500 bg-emerald-500/10 cursor-pointer transition";
+                document.getElementById('daily-days-box').classList.add('hidden');
+                bookingState.days = [];
+                document.querySelectorAll('.day-btn').forEach(b => {
+                    b.className = "day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer";
+                });
+            }
+            updateSummary();
+        }
+
+        function toggleDay(day, btnElem) {
+            const idx = bookingState.days.indexOf(day);
+            if (idx > -1) {
+                bookingState.days.splice(idx, 1);
+                btnElem.className = "day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer";
+            } else {
+                bookingState.days.push(day);
+                btnElem.className = "day-btn p-2.5 rounded-lg border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-semibold transition cursor-pointer";
+            }
+            updateSummary();
+        }
+
+        function toggleSlot(slot, cardElem) {
+            const idx = bookingState.slots.indexOf(slot);
+            if (idx > -1) {
+                bookingState.slots.splice(idx, 1);
+                cardElem.className = "slot-card p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition";
+            } else {
+                if (bookingState.slots.length >= 2) {
+                    showToast("Maximum of 2 time slots allowed per booking. Unselect a slot to choose another.", "error");
+                    return;
+                }
+                bookingState.slots.push(slot);
+                cardElem.className = "slot-card p-3 rounded-xl border border-emerald-500 bg-emerald-500/10 cursor-pointer transition";
+            }
+            updateSummary();
+        }
+
+        function calculateCurrentFee() {
+            let fee = bookingState.plan === 'weekly' ? 9000 : (Math.max(1, bookingState.days.length) * 1500);
+            if (bookingState.subject === 'Both Bio & Chem') fee *= 2;
+            return fee;
+        }
+
+        function updateSummary() {
+            document.getElementById('summary-subject').innerText = bookingState.subject;
+            let fee = calculateCurrentFee();
+            let planText = bookingState.plan === 'weekly' ? "Weekly Pass (Mon–Sat)" : `Daily Pass (${bookingState.days.length} day${bookingState.days.length > 1 ? 's' : ''})`;
+            document.getElementById('summary-plan').innerText = planText;
+            document.getElementById('summary-fee').innerText = `UGX ${fee.toLocaleString()}`;
+            document.getElementById('summary-slots').innerText = bookingState.slots.length > 0 ? bookingState.slots.join(', ') : 'None selected';
+            updateUssdPaymentLinks();
+        }
+
+        function syncPaymentCoordinator() {
+            const coordinator = document.getElementById('target-coordinator').value;
+            const btn1 = document.getElementById('ussd-btn-1');
+            const btn2 = document.getElementById('ussd-btn-2');
+            const text1 = document.getElementById('ussd-text-1');
+            const text2 = document.getElementById('ussd-text-2');
+            let fee = calculateCurrentFee();
+
+            if (coordinator === '256751341896') {
+                btn1.className = "ussd-pay-btn bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between shadow cursor-pointer opacity-100";
+                text1.innerText = `*185*1*1*0751341896*${fee}#`;
+
+                btn2.className = "ussd-pay-btn bg-slate-800 text-slate-500 font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between opacity-50 cursor-not-allowed";
+                text2.innerText = "Locked (Select Tr. Hamdan)";
+            } else {
+                btn1.className = "ussd-pay-btn bg-slate-800 text-slate-500 font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between opacity-50 cursor-not-allowed";
+                text1.innerText = "Locked (Select Tr. Surgeon)";
+
+                btn2.className = "ussd-pay-btn bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between shadow cursor-pointer opacity-100";
+                text2.innerText = `*185*1*1*0759203256*${fee}#`;
+            }
+            updateUssdPaymentLinks();
+        }
+
+        function updateUssdPaymentLinks() {
+            let fee = calculateCurrentFee();
+            const coordinator = document.getElementById('target-coordinator').value;
+
+            const ussd1 = `tel:*185*1*1*0751341896*${fee}%23`;
+            const ussd2 = `tel:*185*1*1*0759203256*${fee}%23`;
+
+            document.getElementById('ussd-btn-1').href = coordinator === '256751341896' ? ussd1 : '#';
+            document.getElementById('ussd-btn-2').href = coordinator === '256759203256' ? ussd2 : '#';
+            
+            const text1 = document.getElementById('ussd-text-1');
+            const text2 = document.getElementById('ussd-text-2');
+            if (coordinator === '256751341896') {
+                text1.innerText = `*185*1*1*0751341896*${fee}#`;
+            } else {
+                text2.innerText = `*185*1*1*0759203256*${fee}#`;
+            }
+        }
+
+        function handleDialPayment(number, event) {
+            const coordinator = document.getElementById('target-coordinator').value;
+            if (coordinator !== number) {
+                event.preventDefault();
+                showToast("Strict Error: You cannot pay on a number that does not match your chosen WhatsApp booking coordinator!", "error");
+                return false;
+            }
+            showToast("Redirecting to phone dialer. Insert your PIN and confirm payment.");
+        }
+
+        async function submitBooking() {
+            if (bookingState.slots.length === 0) {
+                showToast("Please select at least 1 time slot before booking.", "error");
+                return;
+            }
+            if (bookingState.plan === 'daily' && bookingState.days.length === 0) {
+                showToast("Please select at least 1 day for your Daily Pass.", "error");
+                return;
+            }
+
+            const target = document.getElementById('target-coordinator').value;
+            const momoTx = document.getElementById('momo-tx').value.trim() || 'Not Provided (Pending Verification)';
+            let fee = calculateCurrentFee();
+
+            const daysStr = bookingState.plan === 'weekly' ? 'Mon–Sat (Full Week)' : bookingState.days.join(', ');
+            const planLabel = bookingState.plan === 'weekly' ? 'Weekly Pass (Mon–Sat)' : `Daily Pass (${bookingState.days.length} Day${bookingState.days.length > 1 ? 's' : ''})`;
+            const programName = "ACADEMIC GIANTS HOLIDAY STUDY & REVISION PROGRAM";
+            const amountFormatted = `UGX ${fee.toLocaleString()}`;
+            const studyTimeFormatted = bookingState.slots.join(' & ');
+
+            const bookingData = {
+                program: programName,
+                student: currentUser.name,
+                class: currentUser.cls,
+                phone: currentUser.phone,
+                phoneKey: currentUser.phoneKey,
+                school: currentUser.school,
+                subject: bookingState.subject,
+                plan: planLabel,
+                days: daysStr,
+                slots: studyTimeFormatted,
+                fee: amountFormatted,
+                momoTx,
+                coordinator: target === '256751341896' ? 'Tr. Surgeon (0751341896)' : 'Tr. Hamdan (0759203256)',
+                confirmed: false,
+                timestamp: new Date().toLocaleString()
+            };
+
+            const localBookings = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+            localBookings.push(bookingData);
+            localStorage.setItem('ag_bookings', JSON.stringify(localBookings));
+
+            const rawMessage = 
+`*${programName}*
+━━━━━━━━━━━━━━━━━━━━━━
+👤 *Name of Applicant:* ${currentUser.name}
+🏫 *Class & School:* ${currentUser.cls} | ${currentUser.school}
+📞 *Phone:* ${currentUser.phone}
+📚 *Subject(s) Chosen:* ${bookingState.subject}
+⏳ *Session & Plan:* ${planLabel} (${daysStr})
+⏰ *Times Chosen:* ${studyTimeFormatted}
+💵 *Amount Paid:* ${amountFormatted}
+🧾 *Transaction ID:* ${momoTx}
+━━━━━━━━━━━━━━━━━━━━━━
+_Academic Giants Family • Embrace the Holiday Study_`;
+
+            const encodedMsg = encodeURIComponent(rawMessage);
+
+            showToast("Opening WhatsApp with your booking details...");
+            window.location.href = `https://wa.me/${target}?text=${encodedMsg}`;
+        }
+
+        // Admin Management Functions (Confirm & Delete)
+        async function loadAdminData() {
+            let loginsList = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+            let bookingsList = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+
+            let loginsHtml = '';
+            loginsList.forEach((d) => {
+                const statusBadge = d.confirmed 
+                    ? `<span class="bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-md text-[10px] font-bold">Confirmed ✓</span>` 
+                    : `<span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-md text-[10px] font-bold">Pending</span>`;
+                
+                loginsHtml += `<tr>
+                    <td class="p-3 font-semibold text-white">${d.name}</td>
+                    <td class="p-3">${d.cls} <br><span class="text-slate-400 text-[11px]">${d.school || ''}</span></td>
+                    <td class="p-3 font-mono">${d.phone}</td>
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3 text-right space-x-1.5">
+                        <button onclick="adminToggleConfirmLearner('${d.phoneKey}', ${!d.confirmed})" class="px-2.5 py-1.5 rounded-lg text-xs font-bold ${d.confirmed ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} transition cursor-pointer">
+                            ${d.confirmed ? 'Unconfirm' : 'Confirm'}
+                        </button>
+                        <button onclick="adminDeleteLearner('${d.phoneKey}')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 transition cursor-pointer">
+                            Delete
+                        </button>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('logins-table-body').innerHTML = loginsHtml || '<tr><td colspan="5" class="p-4 text-center text-slate-500">No learner records found.</td></tr>';
+            document.getElementById('stat-logins').innerText = loginsList.length;
+
+            let bookHtml = '';
+            bookingsList.forEach((d, index) => {
+                const statusBadge = d.confirmed 
+                    ? `<span class="bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-md text-[10px] font-bold">Confirmed ✓</span>` 
+                    : `<span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-md text-[10px] font-bold">Pending</span>`;
+
+                bookHtml += `<tr>
+                    <td class="p-3 font-semibold text-white">${d.student} <br><span class="text-slate-400 text-[11px] font-mono">${d.phone}</span></td>
+                    <td class="p-3 text-emerald-400">${d.subject} <br><span class="text-slate-300 text-[11px]">${d.plan}</span></td>
+                    <td class="p-3 font-mono font-bold text-white">${d.fee} <br><span class="text-slate-400 text-[10px]">${d.momoTx}</span></td>
+                    <td class="p-3 text-emerald-300">${d.coordinator} <br>${statusBadge}</td>
+                    <td class="p-3 text-right space-x-1.5">
+                        <button onclick="adminToggleConfirmBooking(${index}, ${!d.confirmed})" class="px-2.5 py-1.5 rounded-lg text-xs font-bold ${d.confirmed ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} transition cursor-pointer">
+                            ${d.confirmed ? 'Unconfirm' : 'Confirm'}
+                        </button>
+                        <button onclick="adminDeleteBooking(${index})" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 transition cursor-pointer">
+                            Delete
+                        </button>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('bookings-table-body').innerHTML = bookHtml || '<tr><td colspan="5" class="p-4 text-center text-slate-500">No bookings found.</td></tr>';
+            document.getElementById('stat-bookings').innerText = bookingsList.length;
+        }
+
+        function adminToggleConfirmLearner(phoneKey, confirmState) {
+            let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+            allLearners = allLearners.map(l => {
+                if (l.phoneKey === phoneKey) l.confirmed = confirmState;
+                return l;
+            });
+            localStorage.setItem('ag_all_learners', JSON.stringify(allLearners));
+            
+            if (currentUser && currentUser.phoneKey === phoneKey) {
+                currentUser.confirmed = confirmState;
+                localStorage.setItem('ag_student_session', JSON.stringify(currentUser));
+                applyLoggedInUI();
+            }
+
+            showToast(`Learner confirmation status updated to: ${confirmState ? 'Confirmed' : 'Pending'}`);
+            loadAdminData();
+        }
+
+        function adminDeleteLearner(phoneKey) {
+            if (!confirm("Are you sure you want to delete this learner record?")) return;
+            let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+            allLearners = allLearners.filter(l => l.phoneKey !== phoneKey);
+            localStorage.setItem('ag_all_learners', JSON.stringify(allLearners));
+            showToast("Learner record deleted.");
+            loadAdminData();
+        }
+
+        function adminToggleConfirmBooking(index, confirmState) {
+            let bookingsList = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+            if (bookingsList[index]) {
+                bookingsList[index].confirmed = confirmState;
+                localStorage.setItem('ag_bookings', JSON.stringify(bookingsList));
+                showToast(`Booking confirmation updated.`);
+                loadAdminData();
+            }
+        }
+
+        function adminDeleteBooking(index) {
+            if (!confirm("Are you sure you want to delete this booking?")) return;
+            let bookingsList = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+            bookingsList.splice(index, 1);
+            localStorage.setItem('ag_bookings', JSON.stringify(bookingsList));
+            showToast("Booking deleted.");
+            loadAdminData();
+        }
+
+        // AI Tutor Chat Bot
+        function sendAiMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML += `<div class="flex items-start justify-end gap-3"><div class="bg-slate-800 rounded-2xl p-3.5 text-slate-100 text-xs sm:text-sm leading-relaxed max-w-[85%] shadow-sm">${text}</div><div class="bg-slate-800 text-emerald-400 p-2 rounded-xl font-bold text-xs">You</div></div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            setTimeout(() => {
+                let reply = "";
+                const lower = text.toLowerCase();
+
+                if (lower.includes('fee') || lower.includes('cost') || lower.includes('price') || lower.includes('3000') || lower.includes('1500')) {
+                    reply = "Holiday coaching fees are strictly <strong>UGX 1,500 per subject per day</strong> (or <strong>UGX 3,000 per day</strong> for both Biology & Chemistry), or <strong>UGX 9,000 per subject</strong> for the full weekly pass (Mon–Sat). Contact Tr. Surgeon (0751341896) or Tr. Hamdan (0759203256).";
+                } else if (lower.includes('o level') || lower.includes('o-level') || lower.includes('s.4') || lower.includes('s4') || lower.includes('s.3') || lower.includes('section b')) {
+                    reply = "For <strong>O-Level S.4's (Current S.3's)</strong>, our Ultimate Revision covers all Biology & Chemistry topics, all practicals, interpreting competency-based items, mole calculations from first principles, and Section B answering strategies!";
+                } else if (lower.includes('tutor') || lower.includes('moore') || lower.includes('kakeeto') || lower.includes('geofrey') || lower.includes('kiyingi') || lower.includes('miracle') || lower.includes('surgeon') || lower.includes('hamdan')) {
+                    reply = "Our distinguished faculty includes <strong>Tr. Surgeon, Tr. Hamdan, Mr. Moore, Mr. Kakeeto, Mr. Geofrey, Mr. Kiyingi, Madam Miracle & Team</strong> — trusted for generations to shape your Biology & Chemistry!";
+                } else if (lower.includes('biology') || lower.includes('p530') || lower.includes('dissection') || lower.includes('microscopy')) {
+                    reply = "In Biology (both O-Level and A-Level P530), scoring an 'A' requires linking physiological mechanisms directly to scenario data, mastering dissection constructs, and accurate microscopy labeling. <strong>Embrace the holiday study</strong> with us!";
+                } else if (lower.includes('chemistry') || lower.includes('p525') || lower.includes('mole') || lower.includes('titration') || lower.includes('organic')) {
+                    reply = "In Chemistry (O-Level & A-Level P525), mole calculations, volumetric titrations, and organic/inorganic qualitative analysis must always be solved from <strong>first principles</strong> rather than memorized shortcuts. An A is assured and a must!";
+                } else {
+                    reply = `Regarding your question on <em>"${text}"</em>: At <strong>Academic Giants Family</strong>, both theories and practicals for O-Level (S.4) and A-Level (S.5 & S.6) are digested and mastered from first principles. Ask any specific topic question or book your session today!`;
+                }
+
+                chatBox.innerHTML += `<div class="flex items-start gap-3"><div class="bg-emerald-600 text-white p-2 rounded-xl font-bold text-xs">AI</div><div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-slate-200 text-xs sm:text-sm leading-relaxed max-w-[85%] shadow-sm">${reply}</div></div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 600);
+        }
+    </script>
+</body>
+</html>
