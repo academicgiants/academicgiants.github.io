@@ -1,0 +1,2640 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Giants Family - Official Holiday Coaching Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKpzsQ8BiZlasD_a8XqnshShlFD5nVcU0",
+            authDomain: "holiday-booking-706cb.firebaseapp.com",
+            projectId: "holiday-booking-706cb",
+            storageBucket: "holiday-booking-706cb.firebasestorage.app",
+            messagingSenderId: "731866682724",
+            appId: "1:731866682724:web:4c27047438e2918f6d9671",
+            measurementId: "G-MXELN4J0YG"
+        };
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const auth = getAuth(app);
+
+            window.db = db;
+            window.auth = auth;
+            window.addDoc = addDoc;
+            window.getDocs = getDocs;
+            window.setDoc = setDoc;
+            window.getDoc = getDoc;
+            window.updateDoc = updateDoc;
+            window.deleteDoc = deleteDoc;
+            window.doc = doc;
+            window.collection = collection;
+            window.onSnapshot = onSnapshot;
+            window.firebaseReady = true;
+
+            signInAnonymously(auth).catch((error) => console.warn("Auth fallback active:", error));
+        } catch (err) {
+            console.warn("Firebase init fallback active:", err);
+            window.firebaseReady = false;
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- Custom Notification Toast -->
+    <div id="toast-box" class="fixed bottom-5 right-5 z-[100] hidden max-w-sm bg-slate-900 border border-emerald-500/50 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl flex items-start gap-3 transition-all duration-300">
+        <div id="toast-icon" class="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg shrink-0 mt-0.5">
+            <i data-lucide="info" class="w-4 h-4"></i>
+        </div>
+        <div class="flex-1 text-xs leading-relaxed" id="toast-message">Notification</div>
+        <button onclick="hideToast()" class="text-slate-400 hover:text-white p-0.5 cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+
+    <!-- Two-Step Double Confirmation Logout Modal -->
+    <div id="logout-modal" class="fixed inset-0 z-[90] hidden bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500/20 text-amber-400 p-2.5 rounded-xl border border-amber-500/30">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <span id="logout-step-badge" class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Confirmation 1 of 2</span>
+                    <h3 id="logout-modal-title" class="text-base font-bold text-white">Confirm Learner Logout</h3>
+                </div>
+            </div>
+            <p id="logout-modal-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Are you sure you want to log out of your Academic Giants learner session?
+            </p>
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button onclick="cancelLogout()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer">
+                    Cancel
+                </button>
+                <button id="logout-confirm-btn" onclick="proceedLogoutStep()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-lg transition cursor-pointer">
+                    Yes, Continue (1/2)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Countdown & Status Bar -->
+    <div class="bg-emerald-950/90 border-b border-emerald-500/30 px-4 py-2 text-xs text-emerald-300 flex flex-wrap items-center justify-between gap-2 shadow-sm">
+        <span class="flex items-center gap-1.5 font-medium tracking-wide">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> Starts Dec 7th, 2026 — From UGX 1,500 / Sub / Day (3,000/- Both)
+        </span>
+        <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0">
+            <span id="countdown-timer" class="font-bold text-emerald-400 font-mono bg-emerald-950 px-2.5 py-0.5 rounded border border-emerald-500/30">Calculating...</span>
+            <span id="active-user-badge" class="bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-md text-[11px] font-semibold">Guest</span>
+            <button id="header-logout-btn" onclick="initiateLogout()" class="hidden bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 px-2.5 py-0.5 rounded-md text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
+                <i data-lucide="log-out" class="w-3 h-3"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Header & Navigation -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-emerald-600 text-white p-2.5 rounded-xl font-extrabold text-sm tracking-wider shadow">AG</div>
+                    <div>
+                        <h1 class="font-black text-sm md:text-base text-white tracking-tight">ACADEMIC GIANTS FAMILY</h1>
+                        <p class="text-[11px] text-emerald-400 font-bold tracking-wider uppercase">EMBRACE THE HOLIDAY STUDY • CHANGE THE GRADES</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto justify-start md:justify-end pb-1 md:pb-0 no-scrollbar">
+                <button type="button" onclick="switchTab('home')" id="nav-home" class="tab-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white transition flex items-center gap-1.5 shadow shrink-0 cursor-pointer">
+                    <i data-lucide="home" class="w-4 h-4"></i> Overview
+                </button>
+                <button type="button" onclick="switchTab('syllabus')" id="nav-syllabus" class="tab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i data-lucide="book-open" class="w-4 h-4 text-emerald-400"></i> Syllabus
+                </button>
+                <button type="button" onclick="switchTab('portal')" id="nav-portal" class="tab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i data-lucide="calendar-check" class="w-4 h-4 text-emerald-400"></i> Booking
+                </button>
+                <button type="button" onclick="switchTab('ai')" id="nav-ai" class="tab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i> AI Tutor
+                </button>
+                <button type="button" onclick="switchTab('admin')" id="nav-admin" class="tab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i data-lucide="lock" class="w-4 h-4 text-amber-400"></i> Admin
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+        <!-- TAB 1: OVERVIEW -->
+        <div id="tab-home" class="tab-pane space-y-6">
+            <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/50 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+                <div class="relative z-10 space-y-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="bg-emerald-500/10 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/20 uppercase tracking-widest inline-block">
+                            O-Level (S.4 / Current S.3's) & A-Level (S.5 Vacists & S.6 Learners)
+                        </span>
+                        <span class="bg-amber-500/10 text-amber-400 text-xs font-extrabold px-3 py-1 rounded-full border border-amber-500/30 uppercase tracking-wider inline-block">
+                            An A is Assured and a Must!
+                        </span>
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">Where Both Theories and Practicals Are Digested & Mastered!</h2>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-3xl">
+                        Welcome to the <strong>Academic Giants Family</strong> Holiday Study & Revision Program in <strong>Biology & Chemistry</strong>. Perfect for the current <strong>O-Level (S.4 / S.3)</strong> as well as <strong>A-Level (S.5 Holiday Vacists & S.6)</strong>! Come and we shape your Biology and Chemistry — <em>Trusted for generations</em>.
+                    </p>
+                    <div class="flex flex-wrap gap-3 pt-2">
+                        <button type="button" onclick="switchTab('portal')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition text-sm shadow-lg shadow-emerald-600/30 flex items-center gap-2 cursor-pointer">
+                            <i data-lucide="calendar-check" class="w-4 h-4"></i> Book Session Now
+                        </button>
+                        <button type="button" onclick="switchTab('syllabus')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-6 py-3 rounded-xl transition text-sm border border-slate-700 cursor-pointer">
+                            View Official Syllabus
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-2.5 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">O-Level Track</span>
+                        <span class="text-xs text-slate-400 font-mono">S.4's (Current S.3's)</span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-extrabold text-white">Ultimate O-Level Biology & Chemistry Revision</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Complete topic digestion, hands-on O-Level laboratory practicals, mole calculations, Section B mastery, and competency-based item interpretation.
+                    </p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-2.5 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">A-Level Track</span>
+                        <span class="text-xs text-slate-400 font-mono">S.5 Vacists & S.6</span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-extrabold text-white">Advanced Biology (P530) & Chemistry (P525)</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        In-depth Physical, Organic & Inorganic Chemistry, Biology constructs, dissection, physiology, microscopy, and UNEB answering techniques.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-md">
+                    <div class="text-emerald-400 font-extrabold text-lg">For As Low As 3,000/-</div>
+                    <h3 class="font-bold text-white text-sm">Per Day (UGX 1,500 / Subject)</h3>
+                    <p class="text-xs text-slate-400">Affordable daily rates (UGX 1,500 per subject/day or 3,000/- for both) and flexible weekly passes.</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-md">
+                    <div class="text-emerald-400 font-extrabold text-lg">Lab & Practicals</div>
+                    <h3 class="font-bold text-white text-sm">Digested & Mastered</h3>
+                    <p class="text-xs text-slate-400">Master volumetric titration, organic/inorganic practicals, microscopy, and dissections.</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-md">
+                    <div class="text-emerald-400 font-extrabold text-lg">Expert Tutors</div>
+                    <h3 class="font-bold text-white text-sm">Distinguished Faculty</h3>
+                    <p class="text-xs text-slate-400">Led by Tr. Surgeon, Tr. Hamdan, Mr. Moore, Mr. Kakeeto, Mr. Geofrey, Mr. Kiyingi, Madam Miracle & Team.</p>
+                </div>
+            </div>
+
+            <div class="bg-sky-950/30 border border-sky-500/30 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="bg-sky-500 text-slate-950 p-3 rounded-xl font-bold shrink-0">
+                        <i data-lucide="send" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-sm sm:text-base">Join the Academic Giants Telegram & Direct Contacts</h4>
+                        <p class="text-xs text-slate-300">Daily notes at <span class="text-sky-400 font-mono font-bold">t.me/academicgiants</span> • Call/WhatsApp: <span class="text-emerald-400 font-mono font-bold">0751341896</span> or <span class="text-emerald-400 font-mono font-bold">0759203256</span></p>
+                    </div>
+                </div>
+                <a href="https://t.me/academicgiants" target="_blank" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs transition shrink-0 w-full sm:w-auto text-center shadow">Open Telegram</a>
+            </div>
+        </div>
+
+        <!-- TAB 2: SYLLABUS -->
+        <div id="tab-syllabus" class="tab-pane hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
+                <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <span class="text-xs font-extrabold text-emerald-400 uppercase tracking-widest">Academic Holiday Study & Revision Program</span>
+                        <h2 class="text-xl sm:text-2xl font-black text-white mt-1">BIOLOGY & CHEMISTRY OFFICIAL SYLLABUS</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">For S.4's (Current S.3's), S.5 (S.4 Holiday Vacists) & S.6 Learners — <em>Where Both Theories and Practicals Are Digested & Mastered!</em></p>
+                    </div>
+                    <span class="bg-amber-500/15 text-amber-300 border border-amber-500/30 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wide shrink-0 self-start sm:self-center">
+                        An A is Assured and a Must
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-950 border border-emerald-500/30 rounded-2xl p-6 space-y-4 shadow-lg">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-amber-500/20 text-amber-400 p-1.5 rounded-lg border border-amber-500/30">
+                                    <i data-lucide="award" class="w-4 h-4"></i>
+                                </span>
+                                <h3 class="font-black text-amber-400 text-sm sm:text-base tracking-wide">S.4'S (ULTIMATE REVISION)</h3>
+                            </div>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-md font-bold">O-Level</span>
+                        </div>
+                        <ul class="space-y-3 text-xs sm:text-sm text-slate-200 font-medium">
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>All Biology & Chemistry Topics Explained</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>All Biology & Chemistry Practicals</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>How to Interpret & Respond to Biology & Chemistry Items</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>How to Tackle Mole Calculations</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>How to Answer Section B</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+                                <span class="italic text-emerald-300 font-semibold">...and much more!</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-950 border border-emerald-500/30 rounded-2xl p-6 space-y-4 shadow-lg">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg border border-emerald-500/30">
+                                    <i data-lucide="award" class="w-4 h-4"></i>
+                                </span>
+                                <h3 class="font-black text-emerald-400 text-sm sm:text-base tracking-wide">S.5 & S.6 STUDY PROGRAM</h3>
+                            </div>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-md font-bold">A-Level</span>
+                        </div>
+                        <ul class="space-y-3 text-xs sm:text-sm text-slate-200 font-medium">
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span><strong>CHEMISTRY:</strong> Physical, Organic & Inorganic</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span><strong>BIOLOGY:</strong> All Constructs, Dissection & Physiology</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>Microscopy</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>Organic, Physical & Inorganic Practicals</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>Tips & Techniques of Answering & Interpretation</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                <span>What to NEVER Leave Out when Answering</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-emerald-950 via-slate-950 to-emerald-950 border border-emerald-500/30 rounded-2xl p-5 text-center space-y-2">
+                    <span class="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Perfect for the Current S4, S5 & S6!
+                    </span>
+                    <h4 class="text-base sm:text-xl font-black text-white tracking-tight uppercase">
+                        Come and We Shape Your Biology and Chemistry — Trusted for Generations
+                    </h4>
+                    <p class="text-xs text-slate-300">
+                        For more details Call/WhatsApp: <strong class="text-emerald-400 font-mono">0751341896</strong> or <strong class="text-emerald-400 font-mono">0759203256</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: BOOKING PORTAL -->
+        <div id="tab-portal" class="tab-pane hidden space-y-6">
+            <!-- Auth Selection / Login / Register Card -->
+            <div id="auth-card" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-8 shadow-2xl max-w-xl mx-auto space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">PBKDF2 & SHA-256 Encrypted Portal</span>
+                        <h2 id="auth-main-title" class="text-lg sm:text-xl font-bold text-white mt-0.5">Learner Authentication</h2>
+                    </div>
+                    <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+                        <button type="button" onclick="switchAuthMode('login')" id="auth-mode-login-btn" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white transition cursor-pointer">Login</button>
+                        <button type="button" onclick="switchAuthMode('register')" id="auth-mode-register-btn" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">Register</button>
+                    </div>
+                </div>
+
+                <!-- Brute-force Lockout Warning Banner -->
+                <div id="login-lockout-banner" class="hidden bg-rose-950/70 border border-rose-500/50 rounded-xl p-3 text-xs text-rose-200 flex items-center gap-2">
+                    <i data-lucide="shield-alert" class="w-4 h-4 text-rose-400 shrink-0"></i>
+                    <span id="login-lockout-text">Too many failed attempts. Please wait before trying again.</span>
+                </div>
+
+                <!-- Returning Learner Login Form -->
+                <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                    <p class="text-xs text-slate-400">Enter your WhatsApp phone number and your Private Secret Access Code to access your isolated account.</p>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">WhatsApp Phone Number</label>
+                        <input type="tel" id="login-phone" required placeholder="077XXXXXXXX" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Private Secret Access Code</label>
+                        <input type="password" id="login-passcode" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono tracking-widest">
+                    </div>
+                    <button type="submit" id="btn-login-submit" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold py-3.5 rounded-xl transition text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer">
+                        <i data-lucide="log-in" class="w-4 h-4"></i> Access Secure Account
+                    </button>
+                </form>
+
+                <!-- New Learner Registration Form -->
+                <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                    <p class="text-xs text-slate-400">Create your strictly secure and isolated Academic Giants learner account. Credentials are salted and hashed locally before transmission.</p>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Group or Full Name</label>
+                        <input type="text" id="reg-name" required placeholder="e.g. Namukasa Joan" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Class Level</label>
+                            <select id="reg-class" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
+                                <option value="S.4 (Current S.3)">O-Level: S.4's (Current S.3's)</option>
+                                <option value="S.5 (S.4 Vacist)">A-Level: S.5 (S.4 Holiday Vacists)</option>
+                                <option value="S.6" selected>A-Level: Senior Six (S.6)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">WhatsApp Phone Number</label>
+                            <input type="tel" id="reg-phone" required placeholder="077XXXXXXXX" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">School Name</label>
+                        <input type="text" id="reg-school" required placeholder="e.g. Kabuwoko S.S / Kinoni Integrated" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Create Private Secret Access Code (Min 6 chars)</label>
+                        <input type="password" id="reg-passcode" minlength="6" oninput="updatePasscodeStrength(this.value)" required placeholder="Create a strong code (min 6 chars)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono tracking-widest">
+                        <div class="flex items-center justify-between mt-1.5">
+                            <p class="text-[10px] text-emerald-400">🔒 Salted PBKDF2/SHA-256 protected.</p>
+                            <span id="passcode-strength-label" class="text-[10px] font-bold text-slate-500">Strength: Enter 6+ chars</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold py-3.5 rounded-xl transition text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer">
+                        <i data-lucide="shield-plus" class="w-4 h-4"></i> Register Secure Account
+                    </button>
+                </form>
+            </div>
+
+            <!-- Authenticated Learner Dashboard -->
+            <div id="booking-section" class="hidden space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-xs bg-emerald-500/10 text-emerald-400 font-bold px-2.5 py-1 rounded-md border border-emerald-500/20 flex items-center gap-1">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Secure Private Account Active
+                            </span>
+                            <span id="student-class-pill" class="text-xs bg-slate-800 text-slate-300 font-semibold px-2.5 py-1 rounded-md">S.6</span>
+                            <span id="student-verification-badge" class="text-[10px] bg-amber-500/20 text-amber-400 font-bold px-2.5 py-0.5 rounded-md border border-amber-500/30">Pending Confirmation</span>
+                        </div>
+                        <h2 id="welcome-student-title" class="text-base sm:text-lg font-bold text-white mt-1.5">Welcome</h2>
+                        <p class="text-xs text-slate-400">Configure your subjects, schedule, and attendance plan below.</p>
+                    </div>
+                    <button type="button" onclick="initiateLogout()" class="text-xs bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 px-4 py-2.5 rounded-xl border border-rose-500/30 transition shrink-0 font-bold flex items-center gap-1.5 cursor-pointer self-end sm:self-center">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Logout Account
+                    </button>
+                </div>
+
+                <!-- Live In-App Confirmation & Admin Notifications Banner -->
+                <div id="learner-notification-banner" class="hidden bg-emerald-950/80 border border-emerald-500/50 rounded-2xl p-5 space-y-2 shadow-xl">
+                    <div class="flex items-center gap-2.5 text-emerald-300 font-extrabold text-sm">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i> Official Confirmation & Payment Notice
+                    </div>
+                    <p id="learner-notification-text" class="text-xs text-emerald-200 leading-relaxed">
+                        🎉 Congratulations! Your Academic Giants learner account and payments/bookings have been officially verified and confirmed by the administration. Welcome aboard!
+                    </p>
+                </div>
+
+                <!-- Inbox for Admin Messages & Notifications -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i data-lucide="bell" class="w-4 h-4 text-emerald-400"></i> Official Inbox & Admin Notifications
+                        </h3>
+                        <span id="unread-notif-count" class="text-[11px] bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold">0 Unread</span>
+                    </div>
+                    <div id="learner-inbox-container" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                        <p class="text-xs text-slate-500 text-center py-4">No notifications or messages from coordinators yet.</p>
+                    </div>
+                </div>
+
+                <!-- Applicant's List of Confirmed & Submitted Bookings -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-400"></i> Your Booking & Payment Records
+                        </h3>
+                        <span class="text-xs text-slate-400">Real-time status updates</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase font-semibold">
+                                <tr>
+                                    <th class="p-3">Subject & Plan</th>
+                                    <th class="p-3">Slots & Days</th>
+                                    <th class="p-3">Fee & TxID</th>
+                                    <th class="p-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="applicant-bookings-table-body" class="divide-y divide-slate-800">
+                                <tr><td colspan="4" class="p-4 text-center text-slate-500">Loading your bookings...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Step 2 of 3</span>
+                            <h3 class="text-base font-bold text-white mt-1">Select Subjects & Schedule</h3>
+                            <p class="text-xs text-slate-400">UGX 1,500 per subject per day (UGX 3,000/day for both).</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300">1. Select Subject Track</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button type="button" onclick="setSubject('Biology (P530)')" id="sub-bio" class="subj-btn p-3 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-bold text-xs text-center transition cursor-pointer">Biology</button>
+                                <button type="button" onclick="setSubject('Chemistry (P525)')" id="sub-chem" class="subj-btn p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold text-xs text-center transition cursor-pointer">Chemistry</button>
+                                <button type="button" onclick="setSubject('Both Bio & Chem')" id="sub-both" class="subj-btn p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold text-xs text-center transition cursor-pointer">Both (3,000/-)</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300">2. Attendance Plan (Mon–Sat)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div onclick="setPlan('daily')" id="plan-daily" class="plan-card p-4 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-bold text-xs text-white">Daily Pass</span>
+                                        <span class="text-xs text-slate-400 font-mono">1,500/sub/day</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400">Select specific days.</p>
+                                </div>
+                                <div onclick="setPlan('weekly')" id="plan-weekly" class="plan-card p-4 rounded-xl border border-emerald-500 bg-emerald-500/10 cursor-pointer transition">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-bold text-xs text-emerald-400">Weekly Pass</span>
+                                        <span class="text-xs text-emerald-400 font-bold font-mono">UGX 9,000/sub</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400">Full 6-day coverage.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="daily-days-box" class="space-y-2 hidden">
+                            <label class="block text-xs font-semibold text-slate-300">Select Specific Days</label>
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                <button type="button" onclick="toggleDay('Monday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Mon</button>
+                                <button type="button" onclick="toggleDay('Tuesday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Tue</button>
+                                <button type="button" onclick="toggleDay('Wednesday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Wed</button>
+                                <button type="button" onclick="toggleDay('Thursday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Thu</button>
+                                <button type="button" onclick="toggleDay('Friday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Fri</button>
+                                <button type="button" onclick="toggleDay('Saturday', this)" class="day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer">Sat</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300">3. Select Time Slots (Strictly Maximum 2)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div onclick="toggleSlot('Morning (8:00 AM – 11:00 AM)', this)" id="slot-Morning" class="slot-card p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition">
+                                    <p class="font-bold text-xs text-white">Morning Session</p>
+                                    <p class="text-[11px] text-slate-400">8:00 AM – 11:00 AM</p>
+                                </div>
+                                <div onclick="toggleSlot('Afternoon (2:00 PM – 5:00 PM)', this)" id="slot-Afternoon" class="slot-card p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition">
+                                    <p class="font-bold text-xs text-white">Afternoon Session</p>
+                                    <p class="text-[11px] text-slate-400">2:00 PM – 5:00 PM</p>
+                                </div>
+                                <div onclick="toggleSlot('Evening (5:30 PM – 8:00 PM)', this)" id="slot-Evening" class="slot-card p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition">
+                                    <p class="font-bold text-xs text-white">Evening Session</p>
+                                    <p class="text-[11px] text-slate-400">5:30 PM – 8:00 PM</p>
+                                </div>
+                                <div onclick="toggleSlot('Night (8:30 PM – 10:30 PM)', this)" id="slot-Night" class="slot-card p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition">
+                                    <p class="font-bold text-xs text-white">Night Session</p>
+                                    <p class="text-[11px] text-slate-400">8:30 PM – 10:30 PM</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Step 3 of 3</span>
+                            <h3 class="text-base font-bold text-white mt-1">Payment & WhatsApp Booking</h3>
+                            <p class="text-xs text-slate-400">Choose coordinator and complete USSD payment.</p>
+                        </div>
+
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2.5">
+                            <div class="flex justify-between text-xs text-slate-300">
+                                <span id="summary-subject" class="font-semibold">Biology (P530)</span>
+                                <span id="summary-plan" class="font-bold text-emerald-400">Weekly Pass</span>
+                            </div>
+                            <div class="flex justify-between text-xs text-slate-300">
+                                <span>Slots:</span>
+                                <span id="summary-slots" class="font-semibold text-white truncate max-w-[160px]">None</span>
+                            </div>
+                            <div class="border-t border-slate-800 pt-2.5 flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-300">Total Fee:</span>
+                                <span id="summary-fee" class="text-base font-extrabold text-emerald-400 font-mono">UGX 9,000</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Send Booking Via WhatsApp To:</label>
+                                <select id="target-coordinator" onchange="syncPaymentCoordinator()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 font-bold">
+                                    <option value="256751341896">Tr. Surgeon (0751341896 - Sembusi Muhamad)</option>
+                                    <option value="256759203256">Tr. Hamdan (0759203256 - Nkwanga Hamudan)</option>
+                                </select>
+                            </div>
+
+                            <!-- Synchronized Airtel Money USSD Payment Buttons with Correct Format -->
+                            <div class="space-y-2 pt-1">
+                                <label class="block text-xs font-semibold text-slate-300">Pay via Airtel Money USSD (Click to Dial):</label>
+                                <div class="grid grid-cols-1 gap-2">
+                                    <a id="ussd-btn-1" href="#" onclick="handleDialPayment('256751341896', event)" class="ussd-pay-btn bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between shadow cursor-pointer">
+                                        <span class="flex items-center gap-2"><i data-lucide="phone-call" class="w-4 h-4"></i> Pay on 0751341896</span>
+                                        <span id="ussd-text-1" class="font-mono bg-emerald-950 px-2 py-1 rounded text-[11px]">Dialing...</span>
+                                    </a>
+                                    <a id="ussd-btn-2" href="#" onclick="handleDialPayment('256759203256', event)" class="ussd-pay-btn bg-slate-800 text-slate-500 font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between opacity-50 cursor-not-allowed">
+                                        <span class="flex items-center gap-2"><i data-lucide="phone-call" class="w-4 h-4"></i> Pay on 0759203256</span>
+                                        <span id="ussd-text-2" class="font-mono bg-slate-950 px-2 py-1 rounded text-[11px]">Locked</span>
+                                    </a>
+                                </div>
+                                <p class="text-[10px] text-slate-400">💡 Clicking the matching button opens your phone dialer with the USSD code pre-filled. Just insert your PIN and confirm!</p>
+                            </div>
+
+                            <!-- Highly Standing Out Failure & Direct Deposit Notice -->
+                            <div class="bg-gradient-to-r from-amber-500/25 via-rose-500/25 to-amber-500/25 border-2 border-amber-400 rounded-2xl p-4 shadow-2xl space-y-2 ring-2 ring-amber-400/40">
+                                <div class="flex items-center gap-2 text-amber-300 font-black text-xs uppercase tracking-wider">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400 shrink-0 animate-bounce"></i> PAYMENT FAILURE FALLBACK NOTICE
+                                </div>
+                                <p class="text-[11px] text-slate-100 leading-relaxed font-medium">
+                                    If the USSD prompt fails, please <strong class="text-amber-300 underline font-extrabold text-xs">deposit directly</strong> on either <strong class="text-white font-mono bg-slate-950 px-1.5 py-0.5 rounded">0751341896 (Sembusi Muhamad)</strong> or <strong class="text-white font-mono bg-slate-950 px-1.5 py-0.5 rounded">0759203256 (Nkwanga Hamudan)</strong>. 
+                                    <br><strong class="text-rose-300 uppercase tracking-wide font-extrabold">⚠️ Ensure you note down your Transaction ID</strong> and enter it below before dispatching!
+                                </p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">MoMo / Airtel Transaction ID <span class="text-rose-400">*</span></label>
+                                <input type="text" id="momo-tx" required placeholder="e.g. TXN987654321 (Mandatory)" class="w-full bg-slate-950 border border-emerald-500/60 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-400 font-mono font-bold">
+                            </div>
+
+                            <button type="button" onclick="submitBooking()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer">
+                                <i data-lucide="send" class="w-4 h-4"></i> Dispatch Booking to WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: AI TUTOR -->
+        <div id="tab-ai" class="tab-pane hidden space-y-5 max-w-3xl mx-auto">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="bot" class="w-5 h-5 text-emerald-400"></i> SURGEON AI Academic & Research Tutor
+                    </h2>
+                    <p class="text-xs text-slate-400">Ask O-Level or A-Level Biology & Chemistry questions powered by Google Gemini AI.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="ai-watchdog-pill" class="hidden text-[11px] bg-amber-500/15 text-amber-300 font-mono font-bold px-2.5 py-1 rounded-full border border-amber-500/30">
+                        Wait: 0s / 60s
+                    </span>
+                    <button type="button" onclick="openQuickOptionsMenu()" class="text-[11px] bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-bold px-3 py-1 rounded-full border border-emerald-500/30 transition cursor-pointer flex items-center gap-1">
+                        <i data-lucide="zap" class="w-3.5 h-3.5"></i> Quick Options
+                    </button>
+                    <span class="text-xs bg-emerald-500/10 text-emerald-400 font-bold px-3 py-1 rounded-full border border-emerald-500/20">Online</span>
+                </div>
+            </div>
+
+            <div id="chat-messages" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 h-96 overflow-y-auto space-y-4 shadow-inner text-xs sm:text-sm">
+                <div class="flex items-start gap-3">
+                    <div class="bg-emerald-600 text-white p-2 rounded-xl font-bold text-xs shrink-0">AI</div>
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-slate-200 text-xs sm:text-sm leading-relaxed max-w-[88%] shadow-sm space-y-3">
+                        <p>Greetings! I am <strong>SURGEON AI</strong>, your research and revision assistant for <strong>O-Level (S.4)</strong> and <strong>A-Level (S.5 & S.6) Biology & Chemistry</strong>. <strong>Embrace the holiday study</strong> and <strong>change the grades</strong>!</p>
+                        <p class="text-[11px] text-slate-400">Type any question below, or tap any <strong>Instant Quick Option</strong> below for immediate answers on the Holiday Program or UNEB Science topics:</p>
+                        
+                        <div class="space-y-1.5 pt-1">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Holiday Program Quick Info:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" onclick="triggerQuickStudyOption('program_dates_fees')" class="bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">📅 Start Date & Fees</button>
+                                <button type="button" onclick="triggerQuickStudyOption('program_slots_passes')" class="bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">⏰ Time Slots & Weekly Pass</button>
+                                <button type="button" onclick="triggerQuickStudyOption('program_syllabus_practicals')" class="bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">🔬 Syllabus & Practicals</button>
+                                <button type="button" onclick="triggerQuickStudyOption('program_booking_ussd')" class="bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">💳 How to Book & Pay</button>
+                                <button type="button" onclick="triggerQuickStudyOption('program_tutors_contacts')" class="bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">👨‍🏫 Tutors & Contacts</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5 pt-2">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Biology & Chemistry Instant Topics:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" onclick="triggerQuickStudyOption('mole_titration')" class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">⚡ Mole & Titration</button>
+                                <button type="button" onclick="triggerQuickStudyOption('enzyme_kinetics')" class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">⚡ Enzyme Kinetics</button>
+                                <button type="button" onclick="triggerQuickStudyOption('organic_mechanisms')" class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">⚡ Organic Mechanisms</button>
+                                <button type="button" onclick="triggerQuickStudyOption('osmosis_water_potential')" class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">⚡ Osmosis & Water Potential</button>
+                                <button type="button" onclick="triggerQuickStudyOption('thermochemistry_hess')" class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">⚡ Thermochemistry & Hess's Law</button>
+                                <button type="button" onclick="triggerQuickStudyOption('uneb_section_b')" class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">⚡ UNEB Section B Tips</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <input type="text" id="chat-input" onkeypress="if(event.key==='Enter') sendAiMessage()" placeholder="Ask a Biology or Chemistry research question..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-xs sm:text-sm text-white focus:outline-none focus:border-emerald-500">
+                <button type="button" id="chat-send-btn" onclick="sendAiMessage()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition text-xs sm:text-sm shrink-0 shadow cursor-pointer">Send</button>
+            </div>
+        </div>
+
+        <!-- TAB 5: ADMIN -->
+        <div id="tab-admin" class="tab-pane hidden space-y-6 max-w-5xl mx-auto">
+            <div id="admin-lock" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-10 text-center space-y-4 shadow-2xl max-w-lg mx-auto">
+                <div class="bg-slate-800 text-amber-400 w-12 h-12 rounded-full flex items-center justify-center mx-auto border border-slate-700 shadow-inner">
+                    <i data-lucide="lock" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Restricted Coordinator Access</h3>
+                <p class="text-xs text-slate-400 max-w-md mx-auto">Enter your secure Administrator PIN to access the student database, active admin presence, and batch/individual messaging.</p>
+                <div class="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto pt-2">
+                    <input type="password" id="admin-pin" onkeypress="if(event.key==='Enter') verifyAdmin()" placeholder="••••" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white text-center tracking-widest focus:outline-none focus:border-emerald-500 font-mono">
+                    <button type="button" onclick="verifyAdmin()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm transition shadow cursor-pointer">Authorize</button>
+                </div>
+            </div>
+
+            <div id="admin-content" class="hidden space-y-6">
+                <!-- Admin Top Bar with Safe Exit -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                        <span class="bg-emerald-500/20 text-emerald-400 p-2 rounded-xl border border-emerald-500/30">
+                            <i data-lucide="shield" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Coordinator Command Center</h3>
+                            <p class="text-[11px] text-slate-400">Live presence heartbeat & encrypted learner management</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="logoutAdmin()" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Lock Admin Session
+                    </button>
+                </div>
+
+                <!-- Admin Dashboard Header Stats & Active Online Admins Counter -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-5 shadow-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-emerald-400 font-extrabold uppercase tracking-wider flex items-center gap-2">
+                                <span class="relative flex h-2.5 w-2.5">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                </span>
+                                Active Online Admins
+                            </p>
+                            <h4 id="stat-online-admins" class="text-2xl sm:text-3xl font-black text-white mt-1">1</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Live active coordinators</p>
+                        </div>
+                        <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-xl border border-emerald-500/20">
+                            <i data-lucide="radio" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Learners Registered</p>
+                        <h4 id="stat-logins" class="text-2xl sm:text-3xl font-black text-white mt-1">0</h4>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Verified & pending accounts</p>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Bookings Submitted</p>
+                        <h4 id="stat-bookings" class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">0</h4>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Session enrollments</p>
+                    </div>
+                </div>
+
+                <!-- Admin Messaging & Notification Center (Batch & Individual) -->
+                <div id="admin-messaging-panel" class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i data-lucide="send" class="w-4 h-4 text-emerald-400"></i> Send Message / Notification to Learners
+                        </h3>
+                        <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded font-bold">Batch & Direct Dispatch</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Delivery Mode / Audience</label>
+                            <select id="admin-msg-target" onchange="toggleAdminTargetSelect()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-bold">
+                                <option value="batch_all">Batch: All Registered Learners</option>
+                                <option value="batch_s4">Batch: O-Level S.4 (Current S.3)</option>
+                                <option value="batch_s5">Batch: A-Level S.5 (S.4 Vacists)</option>
+                                <option value="batch_s6">Batch: A-Level Senior Six (S.6)</option>
+                                <option value="batch_confirmed">Batch: Confirmed Learners Only</option>
+                                <option value="batch_pending">Batch: Pending Learners Only</option>
+                                <option value="individual">Individual Learner Account</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Notification Type</label>
+                            <select id="admin-msg-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-bold">
+                                <option value="Official Announcement">Official Announcement</option>
+                                <option value="Payment / Verification Notice">Payment / Verification Notice</option>
+                                <option value="Schedule / Class Alert">Schedule / Class Alert</option>
+                                <option value="Direct Support">Direct Support</option>
+                            </select>
+                        </div>
+                        <div id="admin-individual-select-box" class="hidden sm:col-span-2 lg:col-span-1">
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Specific Learner Account</label>
+                            <select id="admin-target-student" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+                                <option value="">-- Choose Learner --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Notification Title / Subject</label>
+                        <input type="text" id="admin-msg-title" placeholder="e.g. Important Holiday Practical Schedule Update" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Message / Instruction Content</label>
+                        <textarea id="admin-msg-body" rows="3" placeholder="Type secure message or notification for the learner account(s)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-emerald-500"></textarea>
+                    </div>
+                    <button type="button" onclick="sendAdminNotification()" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold py-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer">
+                        <i data-lucide="bell" class="w-4 h-4"></i> Dispatch Secure Message / Notification
+                    </button>
+                </div>
+
+                <!-- Learners Database Table -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i> Student Logins & Registration Database
+                        </h3>
+                        <span class="text-xs text-slate-400">Manage confirmation, direct messages & records</span>
+                    </div>
+                    <div class="overflow-x-auto max-h-72">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0 font-semibold">
+                                <tr>
+                                    <th class="p-3">Name</th>
+                                    <th class="p-3">Class & School</th>
+                                    <th class="p-3">Phone</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logins-table-body" class="divide-y divide-slate-800">
+                                <tr><td colspan="5" class="p-4 text-center text-slate-500">Loading records...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bookings Database Table -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-400"></i> Confirmed Bookings & Payments
+                        </h3>
+                        <span class="text-xs text-slate-400">Verify transactions</span>
+                    </div>
+                    <div class="overflow-x-auto max-h-64">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0 font-semibold">
+                                <tr>
+                                    <th class="p-3">Student</th>
+                                    <th class="p-3">Subject & Plan</th>
+                                    <th class="p-3">Fee & TxID</th>
+                                    <th class="p-3">Coordinator</th>
+                                    <th class="p-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookings-table-body" class="divide-y divide-slate-800">
+                                <tr><td colspan="5" class="p-4 text-center text-slate-500">Loading bookings...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-400 space-y-1.5">
+        <p><strong>ACADEMIC GIANTS FAMILY</strong> &copy; 2026 | Embrace the Holiday Study • Change the Grades</p>
+        <p>Tutors: Tr. Surgeon (Sembusi Muhamad), Tr. Hamdan (Nkwanga Hamudan), Mr. Moore, Mr. Kakeeto, Mr. Geofrey, Mr. Kiyingi, Madam Miracle & Team</p>
+        <p>For More Details Call/WhatsApp: 0751341896 or 0759203256 | Telegram: <a href="https://t.me/academicgiants" target="_blank" class="text-sky-400 hover:underline">t.me/academicgiants</a></p>
+    </footer>
+
+    <!-- Google GenAI SDK Module Script using multi-model fallback + 60s delay watchdog + clean plain-English quick options -->
+    <script type="module">
+        import { GoogleGenAI } from "https://esm.run/@google/genai";
+
+        const ai = new GoogleGenAI({ apiKey: "AQ.Ab8RN6Ku6xrcnJOrj2XNsF4hXRO6T-2_KEflzerzh1Bt243eQA" });
+
+        // Clean plain-English & Unicode quick study bank (zero raw markdown asterisks or LaTeX codes)
+        const quickStudyBank = {
+            program_dates_fees: {
+                category: "Holiday Program",
+                label: "Holiday Program Start Date & Fees",
+                intros: [
+                    "Here are the official Academic Giants Family Holiday Coaching dates and student-friendly fee rates:",
+                    "Welcome to the Academic Giants Holiday Study & Revision Program! Here is how the dates and fees work:",
+                    "Planning your holiday revision budget? Here are the official start dates and daily/weekly rates:"
+                ],
+                corePoints: [
+                    "1. Official Start Date: Monday, December 7th, 2026 (Classes run Monday through Saturday).\n2. Affordable Daily Rate: UGX 1,500 per subject per day — or only UGX 3,000 per day for both Biology and Chemistry together.\n3. Weekly Pass Option: UGX 9,000 per subject for full 6-day coverage (Monday to Saturday), or UGX 18,000 for both subjects all week.",
+                    "1. Program Launch: December 7th, 2026, running 6 days a week (Mon–Sat).\n2. Flexible Payment Plans: Choose the Daily Pass (UGX 1,500/subject/day; UGX 3,000 for both) if attending specific days, or the Weekly Pass (UGX 9,000/subject) for uninterrupted Monday–Saturday mastery.\n3. Target Classes: Open to O-Level S.4 candidates (current S.3's) and A-Level S.5 holiday vacists & S.6 learners."
+                ],
+                examples: [
+                    "Fee Breakdown Tip: If you attend Biology and Chemistry on Monday, Wednesday, and Friday (3 days), your Daily Pass total is 3 days × UGX 3,000 = UGX 9,000. Attending all 6 days on a Weekly Pass costs UGX 18,000 for both subjects.",
+                    "Value Highlight: Every single fee covers both theory digestion and hands-on laboratory practical mastery — An A is assured and a must!"
+                ],
+                checks: [
+                    "Ready to reserve your seat? Click the Booking tab at the top of this portal to select your subjects and days!"
+                ]
+            },
+            program_slots_passes: {
+                category: "Holiday Program",
+                label: "Daily Time Slots & Weekly Passes",
+                intros: [
+                    "Academic Giants Family offers four flexible study sessions every day from Monday to Saturday:",
+                    "Here is the official daily timetable and session rules for the Holiday Coaching Program:",
+                    "You can tailor your holiday timetable around your personal schedule using our four daily slots:"
+                ],
+                corePoints: [
+                    "1. Morning Session: 8:00 AM – 11:00 AM\n2. Afternoon Session: 2:00 PM – 5:00 PM\n3. Evening Session: 5:30 PM – 8:00 PM\n4. Night Session: 8:30 PM – 10:30 PM\n5. Booking Rule: Each learner can select a maximum of 2 time slots per booking to ensure focused, high-retention study.",
+                    "1. Four Convenient Windows (Mon–Sat): Morning (8:00 AM – 11:00 AM), Afternoon (2:00 PM – 5:00 PM), Evening (5:30 PM – 8:00 PM), and Night (8:30 PM – 10:30 PM).\n2. Daily vs. Weekly Pass: Pick specific days on the Daily Pass (UGX 1,500/subject/day) or lock in the full Monday–Saturday Weekly Pass (UGX 9,000/subject)."
+                ],
+                examples: [
+                    "Recommended Combination: Many A-Level learners pair the Morning Session (8:00 AM – 11:00 AM) for theory concepts with the Afternoon Session (2:00 PM – 5:00 PM) for lab practicals and calculations.",
+                    "Flexible Revision: Evening and Night sessions are ideal for learners doing intensive question-bank drills and past-paper interpretation."
+                ],
+                checks: [
+                    "Want to lock in your preferred time slots? Switch to the Booking tab and pick up to 2 slots now!"
+                ]
+            },
+            program_syllabus_practicals: {
+                category: "Holiday Program",
+                label: "Biology & Chemistry Syllabus & Practicals",
+                intros: [
+                    "At Academic Giants Family, both theories and practicals are digested and mastered for O-Level and A-Level:",
+                    "Here is what you will cover in our official Holiday Study & Revision Syllabus:",
+                    "Our holiday curriculum is engineered specifically around UNEB & NCDC examination standards:"
+                ],
+                corePoints: [
+                    "1. O-Level Track (S.4's / Current S.3's): Complete digestion of all Biology & Chemistry topics, hands-on O-Level lab practicals, mole calculations, competency-based item interpretation, and Section B mastery.\n2. A-Level Chemistry (P525): Physical, Organic, and Inorganic Chemistry theory plus volumetric, thermochemical, kinetic, and qualitative practicals.\n3. A-Level Biology (P530): All constructs, physiology, dissection, microscopy, and UNEB answering techniques.",
+                    "1. Practicals Made Simple: Master volumetric titrations, organic/inorganic qualitative analysis, biological dissections, and slide microscopy.\n2. Exam Technique Focus: Learn what to NEVER leave out when answering UNEB questions and how to interpret complex scenario items."
+                ],
+                examples: [
+                    "Program Promise: Come and we shape your Biology and Chemistry — Trusted for generations. Perfect for current S.4, S.5 vacists, and S.6 learners!",
+                    "Check the Syllabus Tab: You can view the full itemized breakdown anytime by tapping 'Syllabus' in the top navigation bar."
+                ],
+                checks: [
+                    "Which track are you joining this holiday — O-Level (S.4) or A-Level (S.5 / S.6)?"
+                ]
+            },
+            program_booking_ussd: {
+                category: "Holiday Program",
+                label: "How to Book & Pay via USSD / WhatsApp",
+                intros: [
+                    "Booking your spot in the Academic Giants Holiday Program takes less than 2 minutes:",
+                    "Follow this simple 3-step guide to register, pay via Airtel Money USSD, and confirm on WhatsApp:",
+                    "Here is how to complete your secure booking and receive official confirmation:"
+                ],
+                corePoints: [
+                    "1. Step 1 (Secure Account): Open the Booking tab and register or log in with your WhatsApp phone number and a private 6+ character secret access code.\n2. Step 2 (Subjects & Slots): Choose Biology, Chemistry, or Both (UGX 3,000/day), select Daily or Weekly Pass, and pick up to 2 time slots.\n3. Step 3 (USSD Payment & WhatsApp): Select your coordinator (Tr. Surgeon on 0751341896 or Tr. Hamdan on 0759203256), tap the matching USSD dial button, enter your Transaction ID, and dispatch to WhatsApp.",
+                    "1. Direct Deposit Fallback: If the USSD prompt ever delays on your network, deposit directly to 0751341896 (Sembusi Muhamad) or 0759203256 (Nkwanga Hamudan).\n2. Always Save Your Transaction ID: Enter the MoMo/Airtel Transaction ID in the portal before tapping 'Dispatch Booking to WhatsApp' so admins can verify your seat fast."
+                ],
+                examples: [
+                    "Real-Time Status Tracking: Once dispatched, you can track your approval status ('Pending Approval' → 'Confirmed ✓') live inside your Booking dashboard and Official Inbox.",
+                    "Join the Community: Daily revision notes are also shared on our Telegram channel at t.me/academicgiants."
+                ],
+                checks: [
+                    "Need help with a booking? Tap the Booking tab now or reach out to Tr. Surgeon or Tr. Hamdan directly!"
+                ]
+            },
+            program_tutors_contacts: {
+                category: "Holiday Program",
+                label: "Tutors, Faculty & Direct Contacts",
+                intros: [
+                    "You will be mentored by a distinguished team of experienced Biology & Chemistry educators:",
+                    "Meet the Academic Giants Family faculty and official coordinator contacts:",
+                    "Here are the tutors and direct contact lines for the Academic Giants Holiday Program:"
+                ],
+                corePoints: [
+                    "1. Distinguished Faculty Team: Tr. Surgeon (Sembusi Muhamad), Tr. Hamdan (Nkwanga Hamudan), Mr. Moore, Mr. Kakeeto, Mr. Geofrey, Mr. Kiyingi, Madam Miracle & Team.\n2. Direct Coordinator Phone & WhatsApp Lines:\n   • Tr. Surgeon (Sembusi Muhamad): 0751341896\n   • Tr. Hamdan (Nkwanga Hamudan): 0759203256\n3. Official Telegram Channel: t.me/academicgiants",
+                    "1. Trusted for Generations: Our tutors specialize in breaking down complex O-Level and A-Level Biology & Chemistry concepts from first principles.\n2. Fast Support: Call or WhatsApp 0751341896 or 0759203256 anytime for venue directions, practical schedules, or group bookings."
+                ],
+                examples: [
+                    "Motto: Embrace the Holiday Study • Change the Grades — Where Both Theories and Practicals Are Digested & Mastered!",
+                    "Group Registration Tip: Studying with classmates? Register your group or individual account under the Booking tab to reserve consecutive lab benches."
+                ],
+                checks: [
+                    "Would you like to revise a Biology or Chemistry topic right now while preparing for Dec 7th?"
+                ]
+            },
+            mole_titration: {
+                category: "Chemistry",
+                label: "Mole Concept & Titration First Principles",
+                intros: [
+                    "Let's break down Volumetric Titration & Mole Calculations from strict UNEB first principles:",
+                    "Here is the exact step-by-step roadmap for Mole Calculations & Redox/Acid-Base Titrations:",
+                    "Mastering Titration Calculations starts with tracking moles cleanly without skipping units:"
+                ],
+                corePoints: [
+                    "1. Standard Solution Molarity: Always convert mass concentration (g/dm³) into molarity (mol/dm³) using: Molarity = (Mass in g/dm³) ÷ RMM.\n2. Moles in Average Titre: Calculate moles of the standard solution reacted using: Moles = (Molarity × Average Titre in cm³) ÷ 1000.\n3. Stoichiometric Mole Ratio: Write the balanced ionic equation first (for example: MnO₄⁻ + 5Fe²⁺ + 8H⁺ → Mn²⁺ + 5Fe³⁺ + 4H₂O, or CO₃²⁻ + 2H⁺ → CO₂ + H₂O) to find the exact reacting ratio.\n4. Scaling to Total Volume: Multiply moles in the pipetted volume (usually 25.0 cm³ or 20.0 cm³) by (250 ÷ Pipette Volume) to get total moles in a 250 cm³ volumetric flask.",
+                    "1. Ionic Equation First: Never guess mole ratios! In acidified KMnO₄ vs ethanedioate (C₂O₄²⁻), the exact ratio is 2 MnO₄⁻ : 5 C₂O₄²⁻.\n2. Consistent Titre Selection: Average only concordant titres within ±0.10 cm³ (or ±0.20 cm³ per rubric) and record burette readings to 2 decimal places ending in .00 or .05.\n3. Percentage Purity & Water of Crystallization: Find pure mass = Moles × RMM, then divide by total impure sample mass and multiply by 100%."
+                ],
+                examples: [
+                    "Worked Example 1: 25.0 cm³ of 0.10 M Na₂CO₃ neutralizes 20.0 cm³ of HCl. Moles of Na₂CO₃ = (0.10 × 25.0) ÷ 1000 = 0.0025 mol. Using the 1:2 ratio (Na₂CO₃ + 2HCl → 2NaCl + CO₂ + H₂O), moles of HCl = 0.0050 mol. Molarity of HCl = (0.0050 × 1000) ÷ 20.0 = 0.25 M.",
+                    "Worked Example 2: 20.0 cm³ of Fe²⁺ reacts with 16.0 cm³ of 0.02 M KMnO₄. Moles of MnO₄⁻ = (0.02 × 16.0) ÷ 1000 = 0.00032 mol. Since 1 MnO₄⁻ reacts with 5 Fe²⁺, moles of Fe²⁺ = 5 × 0.00032 = 0.0016 mol in 20.0 cm³, giving 0.08 M.",
+                    "Worked Example 3: Hydrated washing soda Na₂CO₃·xH₂O has an RMM of 286. Since anhydrous Na₂CO₃ = 106, mass of water = 286 − 106 = 180. Dividing by 18 (RMM of H₂O) gives x = 10."
+                ],
+                checks: [
+                    "Self-Check: Why do we acidify KMnO₄ titrations with dilute H₂SO₄ rather than HCl or HNO₃?",
+                    "Self-Check: Calculate the molarity of NaOH if 25.0 cm³ requires 12.5 cm³ of 0.20 M H₂SO₄ for complete neutralization.",
+                    "Self-Check: What colour change marks the end-point when titrating acidified KMnO₄ from the burette into Fe²⁺ solution?"
+                ]
+            },
+            enzyme_kinetics: {
+                category: "Biology",
+                label: "Enzyme Kinetics & Inhibition",
+                intros: [
+                    "Let's examine Enzyme Action, Km, Vmax, and Inhibition from biological first principles:",
+                    "Understanding Enzyme Kinetics is a high-yield A-Level Biology (P530) construct. Let's analyze it clearly:",
+                    "Here is how enzymes lower activation energy and respond to inhibitors in UNEB essays:"
+                ],
+                corePoints: [
+                    "1. Induced-Fit Hypothesis: The active site is flexible; substrate binding induces a conformational change that strains substrate bonds, lowering activation energy (Ea) to form the Enzyme-Substrate (ES) complex.\n2. Competitive Inhibition: The inhibitor has a similar 3D shape to the substrate and competes for the active site. Increasing substrate concentration [S] outcompetes the inhibitor, so Vmax remains unchanged while apparent Km increases.\n3. Non-Competitive Inhibition: The inhibitor binds to an allosteric site away from the active site, altering the enzyme's tertiary structure and active site geometry. Vmax decreases permanently regardless of [S], while Km stays constant.",
+                    "1. Temperature & pH Effects: Above optimum temperature, excessive kinetic vibration breaks hydrogen and ionic bonds maintaining the 3D tertiary structure, causing the active site to denature.\n2. Significance of Km (Michaelis Constant): Km is the substrate concentration at which reaction velocity is half of Vmax (½ Vmax). A low Km indicates high affinity of the enzyme for its substrate."
+                ],
+                examples: [
+                    "Biological Example 1: Malonate competitively inhibits succinate dehydrogenase in the Krebs cycle because malonate structurally mimics succinate.",
+                    "Biological Example 2: Cyanide (CN⁻) non-competitively inhibits cytochrome c oxidase in the mitochondrial electron transport chain by binding to the iron-copper center.",
+                    "Biological Example 3: Heavy metal ions (Hg²⁺, Pb²⁺) break disulfide bridges (-S-S-) and ionic bonds in the enzyme's tertiary structure."
+                ],
+                checks: [
+                    "Self-Check: How can you experimentally distinguish between a competitive and a non-competitive inhibitor using a rate vs. substrate concentration graph?",
+                    "Self-Check: Why does enzyme activity plateau at Vmax even when more substrate is added?",
+                    "Self-Check: Explain why pepsin works best at pH 2 while salivary amylase denatures in the stomach."
+                ]
+            },
+            organic_mechanisms: {
+                category: "Chemistry",
+                label: "Organic Reaction Mechanisms",
+                intros: [
+                    "In A-Level Chemistry (P525), organic mechanisms require exact curly arrows showing electron-pair movement:",
+                    "Let's master Organic Mechanisms (SN1, SN2, Electrophilic Addition & Substitution) step by step:",
+                    "Never lose marks on curly arrows! Here are the core mechanism rules:"
+                ],
+                corePoints: [
+                    "1. Curly Arrow Rule: Every curly arrow MUST start from an electron-rich site (a lone pair or a covalent bond) and point directly to an electron-deficient atom.\n2. Electrophilic Addition (Alkenes): The π-electron cloud attacks the δ+ atom of H-Br, forming the more stable carbocation intermediate (Markovnikov's rule: 3° > 2° > 1°), followed by rapid attack by :Br⁻.\n3. Nucleophilic Substitution: Primary haloalkanes undergo concerted backside attack (SN2, inversion of configuration), whereas tertiary haloalkanes ionize first to a planar carbocation (SN1, racemization).",
+                    "1. Electrophilic Aromatic Substitution (Benzene): Benzene uses a halogen carrier (such as AlCl₃ or FeBr₃) to generate a strong electrophile (NO₂⁺, R⁺, or Br⁺). The delocalized π-ring attacks the electrophile to form a resonant arenium ion, followed by loss of H⁺ to restore aromatic stability."
+                ],
+                examples: [
+                    "Mechanism Spotlight 1 (Propene + HBr): CH₃CH=CH₂ + H(δ+)-Br(δ-) → CH₃CH⁺CH₃ (secondary carbocation) + :Br⁻ → CH₃CH(Br)CH₃ (2-bromopropane).",
+                    "Mechanism Spotlight 2 (Nitration of Benzene): HNO₃ + 2H₂SO₄ → NO₂⁺ + H₃O⁺ + 2HSO₄⁻. The nitronium ion (NO₂⁺) acts as the electrophile at 55°C.",
+                    "Mechanism Spotlight 3 (Brady's Test): Carbonyl compounds (C=O) undergo nucleophilic addition-elimination with 2,4-DNPH to form an orange/yellow crystalline hydrazone precipitate."
+                ],
+                checks: [
+                    "Self-Check: Why does 2-methylpropene react faster with HBr than ethene?",
+                    "Self-Check: Why does benzene undergo electrophilic substitution rather than addition reactions?",
+                    "Self-Check: State the reagents and conditions required to convert bromoethane into ethanol versus ethene."
+                ]
+            },
+            osmosis_water_potential: {
+                category: "Biology",
+                label: "Osmosis & Water Potential",
+                intros: [
+                    "Let's analyze Water Potential (Ψ), Solute Potential (Ψs), and Pressure Potential (Ψp) in plant cells:",
+                    "Water movement in cells follows strict thermodynamic water potential gradients. Here is the breakdown:",
+                    "Here is how to score full marks on Osmosis & Plant Water Relations questions:"
+                ],
+                corePoints: [
+                    "1. Fundamental Equation: Ψ = Ψs + Ψp (Water Potential = Solute Potential + Pressure Potential).\n2. Pure Water Reference: Pure water at standard atmospheric pressure has Ψ = 0 kPa (the highest possible water potential). Adding solutes lowers water potential, making Ψs always negative.\n3. Direction of Flow: Water always moves by osmosis from a region of higher (less negative) water potential to a region of lower (more negative) water potential across a selectively permeable membrane.",
+                    "1. Incipient Plasmolysis: The exact point at which the protoplast just begins to pull away from the cell wall; here Ψp = 0 kPa, so Ψcell = Ψs.\n2. Full Turgidity: In pure water (Ψ = 0), water enters until the rigid cellulose cell wall exerts an equal and opposite pressure potential (Ψp = −Ψs), making Ψcell = 0 and net osmosis stops."
+                ],
+                examples: [
+                    "Calculation Example 1: If a plant cell has Ψs = −850 kPa and Ψp = +350 kPa, then Ψcell = −850 + 350 = −500 kPa. Placed in a sucrose solution of Ψ = −650 kPa, water leaves the cell (since −500 is higher than −650).",
+                    "Calculation Example 2: Two adjacent cells A (Ψs = −900, Ψp = +400 → Ψ = −500 kPa) and B (Ψs = −700, Ψp = +100 → Ψ = −600 kPa): water flows from Cell A to Cell B."
+                ],
+                checks: [
+                    "Self-Check: What happens to an animal red blood cell placed in distilled water compared to a plant parenchyma cell?",
+                    "Self-Check: Calculate Ψcell at incipient plasmolysis if Ψs = −1120 kPa."
+                ]
+            },
+            thermochemistry_hess: {
+                category: "Chemistry",
+                label: "Thermochemistry & Hess's Law",
+                intros: [
+                    "Let's master Enthalpy Cycles, Lattice Energy, and Hess's Law from first principles:",
+                    "Here is the exact method to solve Born-Haber and Enthalpy of Formation/Combustion cycles:",
+                    "Thermochemistry calculations become effortless when you apply conservation of energy:"
+                ],
+                corePoints: [
+                    "1. Hess's Law: The total enthalpy change for a chemical reaction is independent of the route taken, provided the initial and final conditions remain identical.\n2. Using Enthalpies of Formation (ΔHf°): ΔH°reaction = Σ ΔHf°(products) − Σ ΔHf°(reactants).\n3. Using Enthalpies of Combustion (ΔHc°): ΔH°reaction = Σ ΔHc°(reactants) − Σ ΔHc°(products).",
+                    "1. Enthalpy of Solution: ΔH°solution = ΔH°lattice dissociation + Σ ΔH°hydration.\n2. Ionic Charge & Radius Effect: Smaller ionic radius and higher charge density produce more exothermic hydration and lattice formation enthalpies."
+                ],
+                examples: [
+                    "Worked Cycle 1: Given ΔHc°(C) = −393.5, ΔHc°(H₂) = −285.8, and ΔHc°(CH₄) = −890.3 kJ/mol: ΔHf°(CH₄) = [−393.5 + 2(−285.8)] − [−890.3] = −74.8 kJ/mol.",
+                    "Solubility Insight: MgSO₄ is much more soluble in water than BaSO₄ because Mg²⁺ has a much smaller ionic radius than Ba²⁺, making its hydration enthalpy significantly more exothermic."
+                ],
+                checks: [
+                    "Self-Check: Why is the first electron affinity of oxygen exothermic (−141 kJ/mol) while its second electron affinity is endothermic (+798 kJ/mol)?",
+                    "Self-Check: Define standard enthalpy of atomization of chlorine."
+                ]
+            },
+            uneb_section_b: {
+                category: "Exam Strategy",
+                label: "UNEB Section B & Practical Mastery",
+                intros: [
+                    "Here is the Academic Giants Family golden checklist for scoring 18–20/20 on UNEB Section B & Competency Items:",
+                    "To secure an A in Biology & Chemistry, you must structure your answers the way UNEB examiners award marks:",
+                    "Never leave easy marks on the table! Follow this exact answering framework:"
+                ],
+                corePoints: [
+                    "1. Deconstruct the Scenario: Identify the exact biological or chemical problem, the target organ/system or chemical species, and underlying scientific principles.\n2. Use Precise Scientific Terminology: Replace vague words with exact terms (e.g., water potential gradient, competitive inhibition, nucleophilic attack, precipitate dissolves in excess).\n3. Pair Observations with Deductions: In practicals and Section B, always link what is observed (colour change, effervescence, gas test) directly with the chemical or biological reason.",
+                    "1. What to NEVER Leave Out:\n   • Chemistry: State symbols (s), (l), (g), (aq) in thermochemical and ionic equations, reaction conditions (temperature, catalyst, pressure) for organic reactions, and proper units (kJ mol⁻¹, mol dm⁻³).\n   • Biology: Link structure directly to function, state ATP/energy requirements for active processes, and conclude with physiological significance."
+                ],
+                examples: [
+                    "High-Scoring Phrase (Chemistry): Instead of 'it bubbles', write: 'Effervescence of a colourless gas that turns limewater milky, confirming CO₂ evolved from a CO₃²⁻ or HCO₃⁻ ion.'",
+                    "High-Scoring Phrase (Biology): Instead of 'villi absorb food', write: 'Microvilli increase surface area, one-cell-thick epithelium shortens diffusion distance, and dense capillary networks maintain a steep concentration gradient.'"
+                ],
+                checks: [
+                    "Self-Check: What 3 reaction conditions must always be stated when describing the industrial Haber Process or Contact Process?",
+                    "Self-Check: Ready to practice? Type any specific O-Level or A-Level topic right now!"
+                ]
+            }
+        };
+
+        // Track used indices per topic so consecutive responses never repeat verbatim
+        const topicRotationTracker = {};
+
+        function pickNonRepeating(topicKey, fieldName, array) {
+            if (!array || array.length === 0) return "";
+            const trackerKey = `${topicKey}_${fieldName}`;
+            const lastIdx = topicRotationTracker[trackerKey] ?? -1;
+            let nextIdx = Math.floor(Math.random() * array.length);
+            if (array.length > 1 && nextIdx === lastIdx) {
+                nextIdx = (lastIdx + 1) % array.length;
+            }
+            topicRotationTracker[trackerKey] = nextIdx;
+            return array[nextIdx];
+        }
+
+        function sanitizeCleanOutput(rawText) {
+            if (!rawText) return "";
+            return String(rawText)
+                .replace(/\*\*(.*?)\*\*/g, '$1')
+                .replace(/__(.*?)__/g, '$1')
+                .replace(/`{1,3}/g, '')
+                .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+                .replace(/\$([^$]+)\$/g, '$1')
+                .replace(/\\rightarrow/g, '→')
+                .replace(/\\implies/g, '⇒')
+                .replace(/\\times/g, '×')
+                .replace(/\\div/g, '÷')
+                .replace(/\\pm/g, '±')
+                .replace(/\\Delta/g, 'Δ')
+                .replace(/\\Psi/g, 'Ψ');
+        }
+
+        function buildDynamicQuickResponse(topicKey) {
+            const topic = quickStudyBank[topicKey] || quickStudyBank.program_dates_fees;
+            const intro = sanitizeCleanOutput(pickNonRepeating(topicKey, 'intros', topic.intros));
+            const core = sanitizeCleanOutput(pickNonRepeating(topicKey, 'corePoints', topic.corePoints));
+            const example = sanitizeCleanOutput(pickNonRepeating(topicKey, 'examples', topic.examples));
+            const check = sanitizeCleanOutput(pickNonRepeating(topicKey, 'checks', topic.checks));
+
+            // Always include a balanced mix of Holiday Program & Science topics in follow-up suggestions
+            const programKeys = Object.keys(quickStudyBank).filter(k => k !== topicKey && quickStudyBank[k].category === "Holiday Program");
+            const scienceKeys = Object.keys(quickStudyBank).filter(k => k !== topicKey && quickStudyBank[k].category !== "Holiday Program");
+            const nextTopics = [
+                ...programKeys.sort(() => 0.5 - Math.random()).slice(0, 2),
+                ...scienceKeys.sort(() => 0.5 - Math.random()).slice(0, 2)
+            ];
+
+            return {
+                category: topic.category,
+                title: topic.label,
+                intro,
+                core,
+                example,
+                check,
+                nextTopics
+            };
+        }
+
+        function matchLocalTopicFromQuery(query) {
+            const q = query.toLowerCase();
+            if (q.includes('fee') || q.includes('cost') || q.includes('price') || q.includes('start') || q.includes('dec') || q.includes('when')) return 'program_dates_fees';
+            if (q.includes('slot') || q.includes('time') || q.includes('morning') || q.includes('evening') || q.includes('night') || q.includes('weekly') || q.includes('daily')) return 'program_slots_passes';
+            if (q.includes('syllabus') || q.includes('practical') || q.includes('cover') || q.includes('s.4') || q.includes('s.5') || q.includes('s.6')) return 'program_syllabus_practicals';
+            if (q.includes('book') || q.includes('pay') || q.includes('ussd') || q.includes('airtel') || q.includes('whatsapp') || q.includes('register')) return 'program_booking_ussd';
+            if (q.includes('tutor') || q.includes('teacher') || q.includes('surgeon') || q.includes('hamdan') || q.includes('contact') || q.includes('call') || q.includes('phone')) return 'program_tutors_contacts';
+            if (q.includes('mole') || q.includes('titrat') || q.includes('molar') || q.includes('burette') || q.includes('pipette') || q.includes('stoich')) return 'mole_titration';
+            if (q.includes('enzyme') || q.includes('inhibit') || q.includes('active site') || q.includes('substrate') || q.includes('km') || q.includes('vmax')) return 'enzyme_kinetics';
+            if (q.includes('organic') || q.includes('mechanism') || q.includes('alkene') || q.includes('benzene') || q.includes('sn1') || q.includes('sn2') || q.includes('electrophil')) return 'organic_mechanisms';
+            if (q.includes('osmos') || q.includes('water potential') || q.includes('plasmolys') || q.includes('turgid')) return 'osmosis_water_potential';
+            if (q.includes('hess') || q.includes('enthalpy') || q.includes('lattice') || q.includes('thermo') || q.includes('calori')) return 'thermochemistry_hess';
+            if (q.includes('uneb') || q.includes('section b') || q.includes('exam') || q.includes('pass') || q.includes('answer')) return 'uneb_section_b';
+            return null;
+        }
+
+        let activeWatchdogTimer = null;
+        let activeWatchdogInterval = null;
+
+        function clearAiWatchdog() {
+            if (activeWatchdogTimer) {
+                clearTimeout(activeWatchdogTimer);
+                activeWatchdogTimer = null;
+            }
+            if (activeWatchdogInterval) {
+                clearInterval(activeWatchdogInterval);
+                activeWatchdogInterval = null;
+            }
+            const pill = document.getElementById('ai-watchdog-pill');
+            if (pill) pill.classList.add('hidden');
+        }
+
+        function renderQuickOptionsCard(chatBox, customHeading) {
+            const programKeys = Object.keys(quickStudyBank).filter(k => quickStudyBank[k].category === "Holiday Program");
+            const scienceKeys = Object.keys(quickStudyBank).filter(k => quickStudyBank[k].category !== "Holiday Program");
+
+            const programButtonsHtml = programKeys.map(key => {
+                const label = quickStudyBank[key].label;
+                return `<button type="button" onclick="triggerQuickStudyOption('${key}')" class="bg-amber-500/20 hover:bg-amber-500/35 text-amber-200 border border-amber-500/40 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer text-left flex items-center gap-1.5 shadow-sm">📅 ${escapeHtml(label)}</button>`;
+            }).join('');
+
+            const scienceButtonsHtml = scienceKeys.sort(() => 0.5 - Math.random()).slice(0, 4).map(key => {
+                const label = quickStudyBank[key].label;
+                return `<button type="button" onclick="triggerQuickStudyOption('${key}')" class="bg-emerald-600/20 hover:bg-emerald-600/35 text-emerald-200 border border-emerald-500/40 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer text-left flex items-center gap-1.5 shadow-sm">⚡ ${escapeHtml(label)}</button>`;
+            }).join('');
+
+            const promptId = 'delay-prompt-' + Date.now();
+            chatBox.innerHTML += `
+                <div id="${promptId}" class="flex items-start gap-3">
+                    <div class="bg-amber-500 text-slate-950 p-2 rounded-xl font-bold text-xs shrink-0">⚡</div>
+                    <div class="bg-amber-950/40 border border-amber-500/50 rounded-2xl p-4 text-slate-100 text-xs sm:text-sm leading-relaxed max-w-[92%] shadow-lg space-y-3">
+                        <div class="flex items-center gap-2 text-amber-300 font-extrabold text-xs uppercase tracking-wider">
+                            <i data-lucide="clock" class="w-4 h-4 text-amber-400 shrink-0"></i> ${escapeHtml(customHeading)}
+                        </div>
+                        <p class="text-xs text-slate-300">
+                            Select any <strong>Instant Quick Option</strong> below for an immediate, plain-English response (covering both the <strong>Holiday Program</strong> and <strong>UNEB Biology & Chemistry</strong>):
+                        </p>
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">Academic Giants Holiday Program:</span>
+                            <div class="flex flex-wrap gap-2">${programButtonsHtml}</div>
+                        </div>
+                        <div class="space-y-1.5 pt-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">UNEB Biology & Chemistry Topics:</span>
+                            <div class="flex flex-wrap gap-2">${scienceButtonsHtml}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            safeCreateIcons();
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        window.openQuickOptionsMenu = function() {
+            const chatBox = document.getElementById('chat-messages');
+            if (!chatBox) return;
+            renderQuickOptionsCard(chatBox, "Instant Quick Options — Holiday Program & Science Topics");
+        };
+
+        window.triggerQuickStudyOption = function(topicKey) {
+            clearAiWatchdog();
+            const chatBox = document.getElementById('chat-messages');
+            const sendBtn = document.getElementById('chat-send-btn');
+            if (!chatBox) return;
+
+            const result = buildDynamicQuickResponse(topicKey);
+            const isProgram = result.category === "Holiday Program";
+
+            // Show user's selected quick prompt bubble
+            chatBox.innerHTML += `<div class="flex items-start justify-end gap-3"><div class="bg-slate-800 rounded-2xl p-3.5 text-slate-100 text-xs sm:text-sm leading-relaxed max-w-[85%] shadow-sm">${isProgram ? '📅' : '⚡'} Quick Option: <strong>${escapeHtml(result.title)}</strong></div><div class="bg-slate-800 text-emerald-400 p-2 rounded-xl font-bold text-xs shrink-0">You</div></div>`;
+
+            // Render varied instant response with clean structured HTML cards + follow-up quick buttons
+            const followUpButtons = result.nextTopics.map(k => {
+                const item = quickStudyBank[k];
+                const icon = item.category === "Holiday Program" ? "📅" : "⚡";
+                return `<button type="button" onclick="triggerQuickStudyOption('${k}')" class="bg-slate-900 hover:bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">${icon} ${escapeHtml(item.label)}</button>`;
+            }).join('');
+
+            chatBox.innerHTML += `
+                <div class="flex items-start gap-3">
+                    <div class="bg-emerald-600 text-white p-2 rounded-xl font-bold text-xs shrink-0">AI</div>
+                    <div class="bg-slate-950 border ${isProgram ? 'border-amber-500/40' : 'border-emerald-500/40'} rounded-2xl p-4 text-slate-200 text-xs sm:text-sm leading-relaxed max-w-[90%] shadow-sm space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider ${isProgram ? 'text-amber-400' : 'text-emerald-400'}">
+                                ${isProgram ? '📅 Official Holiday Program Guide' : '⚡ Instant First-Principles Guide'}
+                            </span>
+                            <button type="button" onclick="triggerQuickStudyOption('${topicKey}')" class="text-[10px] text-amber-300 hover:underline font-bold cursor-pointer">↻ New Variation</button>
+                        </div>
+                        <p class="text-slate-100 font-medium">${escapeHtml(result.intro)}</p>
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-slate-200 whitespace-pre-line text-xs leading-relaxed">${escapeHtml(result.core)}</div>
+                        <div class="bg-emerald-950/30 border border-emerald-500/25 rounded-xl p-3 text-emerald-200 text-xs leading-relaxed">${escapeHtml(result.example)}</div>
+                        <p class="text-amber-300 text-xs font-semibold">${escapeHtml(result.check)}</p>
+                        <div class="pt-2 border-t border-slate-800/80 space-y-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Explore more Quick Options:</span>
+                            <div class="flex flex-wrap gap-2">${followUpButtons}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (sendBtn) sendBtn.disabled = false;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+
+        window.sendAiMessage = async function() {
+            const input = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('chat-send-btn');
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+            const chatBox = document.getElementById('chat-messages');
+            if (!chatBox) return;
+
+            clearAiWatchdog();
+
+            chatBox.innerHTML += `<div class="flex items-start justify-end gap-3"><div class="bg-slate-800 rounded-2xl p-3.5 text-slate-100 text-xs sm:text-sm leading-relaxed max-w-[85%] shadow-sm">${escapeHtml(text)}</div><div class="bg-slate-800 text-emerald-400 p-2 rounded-xl font-bold text-xs shrink-0">You</div></div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const thinkingId = 'ai-thinking-' + Date.now();
+            chatBox.innerHTML += `<div id="${thinkingId}" class="flex items-start gap-3"><div class="bg-emerald-600 text-white p-2 rounded-xl font-bold text-xs shrink-0">AI</div><div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-slate-400 text-xs sm:text-sm italic max-w-[85%] shadow-sm">Surgeon AI is analyzing from first principles...</div></div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            if (sendBtn) sendBtn.disabled = true;
+
+            // Start 1-Minute (60-second) Delay Watchdog
+            let elapsedSeconds = 0;
+            let delayPromptShown = false;
+            let requestSettled = false;
+            const pill = document.getElementById('ai-watchdog-pill');
+            if (pill) {
+                pill.innerText = "Wait: 0s / 60s";
+                pill.classList.remove('hidden');
+            }
+
+            activeWatchdogInterval = setInterval(() => {
+                elapsedSeconds++;
+                if (pill) pill.innerText = `Wait: ${elapsedSeconds}s / 60s`;
+            }, 1000);
+
+            activeWatchdogTimer = setTimeout(() => {
+                if (!requestSettled && !delayPromptShown) {
+                    delayPromptShown = true;
+                    const thinkingElem = document.getElementById(thinkingId);
+                    if (thinkingElem) {
+                        thinkingElem.querySelector('div:last-child').innerText = "Surgeon AI is taking over 1 minute due to network demand...";
+                    }
+                    renderQuickOptionsCard(chatBox, "AI Delayed (1 Minute Elapsed) — Try Fast Quick Options");
+                    if (sendBtn) sendBtn.disabled = false;
+                }
+            }, 60000);
+
+            // Multi-model resilient fallback chain to eliminate 503 high-demand dead ends
+            const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+            let replyText = null;
+
+            const systemInstruction = "You are SURGEON AI, an expert A-Level and O-Level Biology and Chemistry tutor for the Academic Giants Family in Uganda (Holiday Program starts Dec 7th, 2026; UGX 1,500/subject/day or 3,000/day for both; Weekly pass UGX 9,000/subject; Contacts: Tr. Surgeon 0751341896, Tr. Hamdan 0759203256). Keep explanations clear, concise, rooted strictly in first principles, and aligned with UNEB/NCDC standards. Write in clean plain English using Unicode chemical/math symbols (like →, ΔH, ⁻¹, ₂, ₃) without raw LaTeX dollar signs or messy markdown.";
+
+            for (const modelName of modelsToTry) {
+                try {
+                    const response = await ai.models.generateContent({
+                        model: modelName,
+                        contents: text,
+                        config: { systemInstruction }
+                    });
+                    if (response && response.text) {
+                        replyText = sanitizeCleanOutput(response.text);
+                        break;
+                    }
+                } catch (err) {
+                    console.warn(`Model ${modelName} encountered an error (e.g. 503 high demand), trying next fallback...`, err);
+                }
+            }
+
+            requestSettled = true;
+            clearAiWatchdog();
+
+            const thinkingElem = document.getElementById(thinkingId);
+            if (thinkingElem) thinkingElem.remove();
+
+            if (replyText) {
+                chatBox.innerHTML += `<div class="flex items-start gap-3"><div class="bg-emerald-600 text-white p-2 rounded-xl font-bold text-xs shrink-0">AI</div><div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-slate-200 text-xs sm:text-sm leading-relaxed max-w-[85%] shadow-sm whitespace-pre-wrap">${escapeHtml(replyText)}</div></div>`;
+            } else {
+                const matchedTopic = matchLocalTopicFromQuery(text);
+                if (matchedTopic) {
+                    const instantFallback = buildDynamicQuickResponse(matchedTopic);
+                    const isProgram = instantFallback.category === "Holiday Program";
+                    chatBox.innerHTML += `
+                        <div class="flex items-start gap-3">
+                            <div class="bg-emerald-600 text-white p-2 rounded-xl font-bold text-xs shrink-0">AI</div>
+                            <div class="bg-slate-950 border ${isProgram ? 'border-amber-500/40' : 'border-emerald-500/40'} rounded-2xl p-4 text-slate-200 text-xs sm:text-sm leading-relaxed max-w-[90%] shadow-sm space-y-2.5">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 block">⚡ Fast Instant Response Mode</span>
+                                <p class="text-slate-100 font-medium">${escapeHtml(instantFallback.intro)}</p>
+                                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-slate-200 whitespace-pre-line text-xs leading-relaxed">${escapeHtml(instantFallback.core)}</div>
+                                <div class="bg-emerald-950/30 border border-emerald-500/25 rounded-xl p-3 text-emerald-200 text-xs leading-relaxed">${escapeHtml(instantFallback.example)}</div>
+                                <p class="text-amber-300 text-xs font-semibold">${escapeHtml(instantFallback.check)}</p>
+                            </div>
+                        </div>
+                    `;
+                } else if (!delayPromptShown) {
+                    renderQuickOptionsCard(chatBox, "Cloud AI Experiencing High Traffic — Select a Fast Quick Option");
+                }
+            }
+
+            if (sendBtn) sendBtn.disabled = false;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+    </script>
+
+    <!-- Core App Logic -->
+    <script>
+        function safeCreateIcons() {
+            try {
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
+                }
+            } catch (e) {}
+        }
+        safeCreateIcons();
+
+        let toastTimeout = null;
+        function showToast(msg, type = 'info') {
+            const box = document.getElementById('toast-box');
+            const textEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+            if (!box || !textEl || !iconEl) return;
+            textEl.innerText = msg;
+
+            if (type === 'error') {
+                box.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-slate-900 border border-rose-500/60 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl flex items-start gap-3";
+                iconEl.className = "bg-rose-500/20 text-rose-400 p-1.5 rounded-lg shrink-0 mt-0.5";
+            } else {
+                box.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-slate-900 border border-emerald-500/60 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl flex items-start gap-3";
+                iconEl.className = "bg-emerald-500/20 text-emerald-400 p-1.5 rounded-lg shrink-0 mt-0.5";
+            }
+            box.classList.remove('hidden');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => hideToast(), 4000);
+        }
+
+        function hideToast() {
+            const box = document.getElementById('toast-box');
+            if (box) box.classList.add('hidden');
+        }
+
+        function updateCountdown() {
+            const timerEl = document.getElementById('countdown-timer');
+            if (!timerEl) return;
+            const targetDate = new Date(2026, 11, 7, 8, 0, 0).getTime();
+            const now = Date.now();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                timerEl.innerText = "PROGRAM LIVE!";
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            const pad = (n) => String(n).padStart(2, '0');
+            timerEl.innerText = `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+        }
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        async function derivePasscodeHash(phoneKey, passcode) {
+            const saltStr = `AG_SECURE_SALT_2026_${phoneKey}`;
+            try {
+                if (window.crypto && window.crypto.subtle) {
+                    const enc = new TextEncoder();
+                    const keyMaterial = await window.crypto.subtle.importKey(
+                        "raw",
+                        enc.encode(passcode),
+                        { name: "PBKDF2" },
+                        false,
+                        ["deriveBits"]
+                    );
+                    const derivedBits = await window.crypto.subtle.deriveBits(
+                        {
+                            name: "PBKDF2",
+                            salt: enc.encode(saltStr),
+                            iterations: 100000,
+                            hash: "SHA-256"
+                        },
+                        keyMaterial,
+                        256
+                    );
+                    const hashArray = Array.from(new Uint8Array(derivedBits));
+                    return "pbkdf2_" + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                }
+            } catch (e) {}
+            let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+            const combo = saltStr + ":" + passcode;
+            for (let i = 0; i < combo.length; i++) {
+                const ch = combo.charCodeAt(i);
+                h1 = Math.imul(h1 ^ ch, 2654435761);
+                h2 = Math.imul(h2 ^ ch, 1597334677);
+            }
+            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+            return "fb_" + (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+        }
+
+        async function legacySha256(message) {
+            try {
+                if (window.crypto && window.crypto.subtle) {
+                    const msgUint8 = new TextEncoder().encode(message);
+                    const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgUint8);
+                    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+                }
+            } catch (e) {}
+            return "";
+        }
+
+        function updatePasscodeStrength(val) {
+            const label = document.getElementById('passcode-strength-label');
+            if (!label) return;
+            if (val.length === 0) {
+                label.innerText = "Strength: Enter 6+ chars";
+                label.className = "text-[10px] font-bold text-slate-500";
+            } else if (val.length < 6) {
+                label.innerText = "Too Short (Min 6 chars)";
+                label.className = "text-[10px] font-bold text-rose-400";
+            } else if (val.length >= 8 && /[0-9]/.test(val) && /[a-zA-Z]/.test(val)) {
+                label.innerText = "Strength: Strong ✓";
+                label.className = "text-[10px] font-bold text-emerald-400";
+            } else {
+                label.innerText = "Strength: Good";
+                label.className = "text-[10px] font-bold text-amber-400";
+            }
+        }
+
+        let adminAuthorized = false;
+        let adminHeartbeatInterval = null;
+        const adminSessionId = 'admin_' + Math.random().toString(36).substring(2, 11);
+        const adminChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('ag_admin_presence') : null;
+
+        if (adminChannel) {
+            adminChannel.onmessage = (event) => {
+                if (event.data && event.data.type === 'ping' && adminAuthorized) {
+                    registerAdminPresence(false);
+                }
+                updateActiveAdminCount();
+            };
+        }
+
+        async function registerAdminPresence(broadcast = true) {
+            if (!adminAuthorized) return;
+            const now = Date.now();
+            let activeAdmins = JSON.parse(localStorage.getItem('ag_online_admins') || '{}');
+            activeAdmins[adminSessionId] = now;
+            localStorage.setItem('ag_online_admins', JSON.stringify(activeAdmins));
+
+            if (broadcast && adminChannel) {
+                adminChannel.postMessage({ type: 'ping', id: adminSessionId, ts: now });
+            }
+
+            if (window.firebaseReady && window.db && window.setDoc) {
+                try {
+                    await window.setDoc(window.doc(window.db, "active_admins", adminSessionId), {
+                        lastActive: now
+                    });
+                } catch (e) {}
+            }
+            await updateActiveAdminCount();
+        }
+
+        async function removeAdminPresence() {
+            let activeAdmins = JSON.parse(localStorage.getItem('ag_online_admins') || '{}');
+            delete activeAdmins[adminSessionId];
+            localStorage.setItem('ag_online_admins', JSON.stringify(activeAdmins));
+            if (adminChannel) {
+                adminChannel.postMessage({ type: 'leave', id: adminSessionId });
+            }
+            if (window.firebaseReady && window.db && window.deleteDoc) {
+                try {
+                    await window.deleteDoc(window.doc(window.db, "active_admins", adminSessionId));
+                } catch (e) {}
+            }
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (adminAuthorized) {
+                let activeAdmins = JSON.parse(localStorage.getItem('ag_online_admins') || '{}');
+                delete activeAdmins[adminSessionId];
+                localStorage.setItem('ag_online_admins', JSON.stringify(activeAdmins));
+            }
+        });
+
+        async function updateActiveAdminCount() {
+            const now = Date.now();
+            let activeAdmins = JSON.parse(localStorage.getItem('ag_online_admins') || '{}');
+            if (adminAuthorized) activeAdmins[adminSessionId] = now;
+
+            if (window.firebaseReady && window.db && window.getDocs) {
+                try {
+                    const snap = await window.getDocs(window.collection(window.db, "active_admins"));
+                    snap.forEach(docSnap => {
+                        const data = docSnap.data();
+                        if (data && data.lastActive) {
+                            activeAdmins[docSnap.id] = Math.max(activeAdmins[docSnap.id] || 0, data.lastActive);
+                        }
+                    });
+                } catch (e) {}
+            }
+
+            let count = 0;
+            const freshAdmins = {};
+            for (const [id, time] of Object.entries(activeAdmins)) {
+                if (now - time < 45000) {
+                    freshAdmins[id] = time;
+                    count++;
+                }
+            }
+            localStorage.setItem('ag_online_admins', JSON.stringify(freshAdmins));
+            const countEl = document.getElementById('stat-online-admins');
+            if (countEl) countEl.innerText = adminAuthorized ? Math.max(1, count) : count;
+        }
+        setInterval(updateActiveAdminCount, 5000);
+
+        async function verifyAdmin() {
+            const inputPin = document.getElementById('admin-pin').value.trim();
+            const expectedPin = String.fromCharCode(...[50, 48, 49, 54]);
+            if (inputPin === expectedPin && parseInt(inputPin, 10) === parseInt('11111100000', 2)) {
+                document.getElementById('admin-pin').value = '';
+                document.getElementById('admin-lock').classList.add('hidden');
+                document.getElementById('admin-content').classList.remove('hidden');
+                
+                adminAuthorized = true;
+                await registerAdminPresence(true);
+                if (adminHeartbeatInterval) clearInterval(adminHeartbeatInterval);
+                adminHeartbeatInterval = setInterval(() => registerAdminPresence(true), 15000);
+
+                loadAdminData();
+                showToast("Coordinator access authorized.");
+            } else {
+                showToast("Incorrect Administrator PIN.", "error");
+            }
+        }
+
+        async function logoutAdmin() {
+            adminAuthorized = false;
+            if (adminHeartbeatInterval) clearInterval(adminHeartbeatInterval);
+            await removeAdminPresence();
+            document.getElementById('admin-content').classList.add('hidden');
+            document.getElementById('admin-lock').classList.remove('hidden');
+            showToast("Admin session locked securely.");
+        }
+
+        let currentUser = null;
+        let currentPhoneKey = null;
+        let bookingState = {
+            subject: 'Biology (P530)',
+            plan: 'weekly',
+            days: [],
+            slots: []
+        };
+
+        let cachedAdminLearners = [];
+        let cachedAdminBookings = [];
+
+        const MAX_LOGIN_ATTEMPTS = 5;
+        const LOCKOUT_DURATION_MS = 60 * 1000;
+
+        function checkLoginLockout() {
+            const state = JSON.parse(localStorage.getItem('ag_login_guard') || '{"attempts":0,"until":0}');
+            const now = Date.now();
+            const banner = document.getElementById('login-lockout-banner');
+            const textEl = document.getElementById('login-lockout-text');
+            if (state.until > now) {
+                const secs = Math.ceil((state.until - now) / 1000);
+                if (banner && textEl) {
+                    banner.classList.remove('hidden');
+                    textEl.innerText = `Security Lockout: Too many failed attempts. Try again in ${secs}s.`;
+                }
+                return true;
+            }
+            if (banner) banner.classList.add('hidden');
+            return false;
+        }
+
+        function recordFailedLoginAttempt() {
+            const state = JSON.parse(localStorage.getItem('ag_login_guard') || '{"attempts":0,"until":0}');
+            state.attempts = (state.attempts || 0) + 1;
+            if (state.attempts >= MAX_LOGIN_ATTEMPTS) {
+                state.until = Date.now() + LOCKOUT_DURATION_MS;
+                state.attempts = 0;
+            }
+            localStorage.setItem('ag_login_guard', JSON.stringify(state));
+            checkLoginLockout();
+        }
+
+        function resetLoginGuard() {
+            localStorage.removeItem('ag_login_guard');
+            const banner = document.getElementById('login-lockout-banner');
+            if (banner) banner.classList.add('hidden');
+        }
+
+        let logoutStep = 0;
+        function initiateLogout() {
+            if (!currentUser) return;
+            logoutStep = 1;
+            const modal = document.getElementById('logout-modal');
+            document.getElementById('logout-step-badge').innerText = "Confirmation 1 of 2";
+            document.getElementById('logout-step-badge').className = "text-[10px] font-bold uppercase tracking-wider text-amber-400";
+            document.getElementById('logout-modal-title').innerText = "Confirm Learner Logout";
+            document.getElementById('logout-modal-desc').innerText = `Are you sure you want to log out of ${currentUser.name}'s secure account session?`;
+            const confirmBtn = document.getElementById('logout-confirm-btn');
+            confirmBtn.innerText = "Yes, Continue (1/2)";
+            confirmBtn.className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-lg transition cursor-pointer";
+            modal.classList.remove('hidden');
+        }
+
+        function proceedLogoutStep() {
+            if (logoutStep === 1) {
+                logoutStep = 2;
+                document.getElementById('logout-step-badge').innerText = "Final Confirmation (2 of 2)";
+                document.getElementById('logout-step-badge').className = "text-[10px] font-bold uppercase tracking-wider text-rose-400";
+                document.getElementById('logout-modal-title').innerText = "Final Confirmation Required";
+                document.getElementById('logout-modal-desc').innerText = "Please confirm a second time: Logging out will clear your secure session on this device. Proceed?";
+                const confirmBtn = document.getElementById('logout-confirm-btn');
+                confirmBtn.innerText = "Confirm Logout Now (2/2)";
+                confirmBtn.className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-lg transition cursor-pointer";
+            } else if (logoutStep === 2) {
+                executeLogout();
+            }
+        }
+
+        function cancelLogout() {
+            logoutStep = 0;
+            document.getElementById('logout-modal').classList.add('hidden');
+        }
+
+        function executeLogout() {
+            logoutStep = 0;
+            document.getElementById('logout-modal').classList.add('hidden');
+            currentUser = null;
+            currentPhoneKey = null;
+            localStorage.removeItem('ag_student_session');
+            document.getElementById('booking-section').classList.add('hidden');
+            document.getElementById('auth-card').classList.remove('hidden');
+            document.getElementById('active-user-badge').innerText = "Guest";
+            document.getElementById('header-logout-btn').classList.add('hidden');
+            showToast("You have been securely logged out.");
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedSession = localStorage.getItem('ag_student_session');
+            if (savedSession) {
+                try {
+                    const parsed = JSON.parse(savedSession);
+                    if (parsed && parsed.phoneKey && parsed.passHash && parsed.sessionToken) {
+                        currentUser = parsed;
+                        currentPhoneKey = parsed.phoneKey;
+                        applyLoggedInUI();
+                        startSessionPolling();
+                    } else {
+                        localStorage.removeItem('ag_student_session');
+                    }
+                } catch (e) {
+                    localStorage.removeItem('ag_student_session');
+                }
+            }
+            syncPaymentCoordinator();
+            safeCreateIcons();
+        });
+
+        function switchAuthMode(mode) {
+            if (mode === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-register').classList.add('hidden');
+                document.getElementById('auth-mode-login-btn').className = "px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white transition cursor-pointer";
+                document.getElementById('auth-mode-register-btn').className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer";
+                document.getElementById('auth-main-title').innerText = "Returning Learner Login";
+            } else {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+                document.getElementById('auth-mode-login-btn').className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer";
+                document.getElementById('auth-mode-register-btn').className = "px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white transition cursor-pointer";
+                document.getElementById('auth-main-title').innerText = "New Learner Registration";
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const cls = document.getElementById('reg-class').value;
+            const phone = document.getElementById('reg-phone').value.trim();
+            const school = document.getElementById('reg-school').value.trim();
+            const passcode = document.getElementById('reg-passcode').value.trim();
+
+            if (!phone || passcode.length < 6) {
+                showToast("Phone number and a Secret Access Code of at least 6 characters are required.", "error");
+                return;
+            }
+
+            const phoneKey = phone.replace(/\D/g, '');
+            if (phoneKey.length < 9) {
+                showToast("Please enter a valid phone number.", "error");
+                return;
+            }
+
+            const passHash = await derivePasscodeHash(phoneKey, passcode);
+            const sessionToken = 'tok_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+
+            let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+            if (allLearners.some(l => l.phoneKey === phoneKey)) {
+                showToast("An account with this phone number already exists. Please login instead.", "error");
+                switchAuthMode('login');
+                return;
+            }
+
+            currentUser = {
+                name,
+                cls,
+                phone,
+                school,
+                phoneKey,
+                passHash,
+                sessionToken,
+                confirmed: false,
+                timestamp: new Date().toLocaleString()
+            };
+
+            if (window.firebaseReady && window.db) {
+                try {
+                    const docRef = await window.addDoc(window.collection(window.db, "login_logs"), currentUser);
+                    currentUser.id = docRef.id;
+                } catch (err) {}
+            }
+
+            allLearners.push(currentUser);
+            localStorage.setItem('ag_all_learners', JSON.stringify(allLearners));
+            localStorage.setItem('ag_student_session', JSON.stringify(currentUser));
+            currentPhoneKey = phoneKey;
+
+            applyLoggedInUI();
+            startSessionPolling();
+            showToast(`Account created securely! Welcome, ${name}.`);
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            if (checkLoginLockout()) {
+                showToast("Account temporarily locked due to multiple failed attempts.", "error");
+                return;
+            }
+
+            const phone = document.getElementById('login-phone').value.trim();
+            const passcode = document.getElementById('login-passcode').value.trim();
+            const phoneKey = phone.replace(/\D/g, '');
+            const passHash = await derivePasscodeHash(phoneKey, passcode);
+            const legacyHash = await legacySha256(phoneKey + "_" + passcode);
+
+            let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+            let matched = allLearners.find(l => l.phoneKey === phoneKey && (l.passHash === passHash || (legacyHash && l.passHash === legacyHash)));
+
+            if (window.firebaseReady && window.db) {
+                try {
+                    const snap = await window.getDocs(window.collection(window.db, "login_logs"));
+                    snap.forEach(docSnap => {
+                        const d = docSnap.data();
+                        if (d.phoneKey === phoneKey && (d.passHash === passHash || (legacyHash && d.passHash === legacyHash))) {
+                            matched = { id: docSnap.id, ...d };
+                        }
+                    });
+                } catch (err) {}
+            }
+
+            if (!matched) {
+                recordFailedLoginAttempt();
+                showToast("Invalid phone number or private access code. Access denied.", "error");
+                return;
+            }
+
+            resetLoginGuard();
+            matched.passHash = passHash;
+            matched.sessionToken = 'tok_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+
+            currentUser = matched;
+            currentPhoneKey = phoneKey;
+            localStorage.setItem('ag_student_session', JSON.stringify(currentUser));
+
+            applyLoggedInUI();
+            startSessionPolling();
+            showToast(`Welcome back, ${currentUser.name}!`);
+        }
+
+        function applyLoggedInUI() {
+            if (!currentUser) return;
+            const authCard = document.getElementById('auth-card');
+            const bookingSec = document.getElementById('booking-section');
+            if (authCard) authCard.classList.add('hidden');
+            if (bookingSec) bookingSec.classList.remove('hidden');
+
+            const welcomeTitle = document.getElementById('welcome-student-title');
+            const classPill = document.getElementById('student-class-pill');
+            const userBadge = document.getElementById('active-user-badge');
+            const logoutBtn = document.getElementById('header-logout-btn');
+
+            if (welcomeTitle) welcomeTitle.innerText = `Welcome, ${currentUser.name}`;
+            if (classPill) classPill.innerText = currentUser.cls;
+            if (userBadge) userBadge.innerText = currentUser.name;
+            if (logoutBtn) logoutBtn.classList.remove('hidden');
+
+            const badge = document.getElementById('student-verification-badge');
+            const banner = document.getElementById('learner-notification-banner');
+            if (currentUser.confirmed) {
+                if (badge) {
+                    badge.innerText = "Officially Confirmed ✓";
+                    badge.className = "text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2.5 py-0.5 rounded-md border border-emerald-500/30";
+                }
+                if (banner) banner.classList.remove('hidden');
+            } else {
+                if (badge) {
+                    badge.innerText = "Pending Confirmation";
+                    badge.className = "text-[10px] bg-amber-500/20 text-amber-400 font-bold px-2.5 py-0.5 rounded-md border border-amber-500/30";
+                }
+                if (banner) banner.classList.add('hidden');
+            }
+            updateSummary();
+            updateUssdPaymentLinks();
+            loadApplicantBookings();
+            loadLearnerInbox();
+            safeCreateIcons();
+        }
+
+        let sessionPollTimer = null;
+        function startSessionPolling() {
+            if (sessionPollTimer) clearInterval(sessionPollTimer);
+            if (!currentPhoneKey) return;
+            sessionPollTimer = setInterval(async () => {
+                if (!currentPhoneKey || !currentUser) return;
+                let updatedConfirmed = null;
+
+                if (window.firebaseReady && window.db) {
+                    try {
+                        const snap = await window.getDocs(window.collection(window.db, "login_logs"));
+                        snap.forEach(docSnap => {
+                            const d = docSnap.data();
+                            if (d.phoneKey === currentPhoneKey) {
+                                updatedConfirmed = Boolean(d.confirmed);
+                                currentUser.id = docSnap.id;
+                            }
+                        });
+                    } catch (err) {}
+                }
+
+                if (updatedConfirmed === null) {
+                    let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+                    let me = allLearners.find(l => l.phoneKey === currentPhoneKey);
+                    if (me) updatedConfirmed = Boolean(me.confirmed);
+                }
+
+                if (updatedConfirmed !== null && updatedConfirmed !== Boolean(currentUser.confirmed)) {
+                    currentUser.confirmed = updatedConfirmed;
+                    localStorage.setItem('ag_student_session', JSON.stringify(currentUser));
+                    let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+                    allLearners = allLearners.map(l => l.phoneKey === currentPhoneKey ? { ...l, confirmed: updatedConfirmed } : l);
+                    localStorage.setItem('ag_all_learners', JSON.stringify(allLearners));
+                    applyLoggedInUI();
+                }
+
+                loadApplicantBookings();
+                loadLearnerInbox();
+            }, 4500);
+        }
+
+        function markNotificationRead(msgId) {
+            let readIds = JSON.parse(localStorage.getItem(`ag_read_notifs_${currentPhoneKey}`) || '[]');
+            if (!readIds.includes(msgId)) {
+                readIds.push(msgId);
+                localStorage.setItem(`ag_read_notifs_${currentPhoneKey}`, JSON.stringify(readIds));
+                loadLearnerInbox();
+            }
+        }
+
+        async function loadLearnerInbox() {
+            if (!currentPhoneKey || !currentUser) return;
+            let messagesList = JSON.parse(localStorage.getItem('ag_notifications') || '[]');
+
+            if (window.firebaseReady && window.db) {
+                try {
+                    const snap = await window.getDocs(window.collection(window.db, "learner_notifications"));
+                    const fsMsgs = [];
+                    snap.forEach(docSnap => fsMsgs.push({ id: docSnap.id, ...docSnap.data() }));
+                    messagesList = fsMsgs;
+                    localStorage.setItem('ag_notifications', JSON.stringify(messagesList));
+                } catch (err) {}
+            }
+
+            const myMessages = messagesList.filter(m => {
+                if (m.target === 'individual') return m.targetPhoneKey === currentPhoneKey;
+                if (m.target === 'batch_all') return true;
+                if (m.target === 'batch_s4') return (currentUser.cls || '').includes('S.4');
+                if (m.target === 'batch_s5') return (currentUser.cls || '').includes('S.5');
+                if (m.target === 'batch_s6') return (currentUser.cls || '').includes('S.6');
+                if (m.target === 'batch_confirmed') return Boolean(currentUser.confirmed);
+                if (m.target === 'batch_pending') return !Boolean(currentUser.confirmed);
+                return false;
+            });
+
+            const readIds = JSON.parse(localStorage.getItem(`ag_read_notifs_${currentPhoneKey}`) || '[]');
+            const container = document.getElementById('learner-inbox-container');
+            const countBadge = document.getElementById('unread-notif-count');
+            if (!container || !countBadge) return;
+
+            if (myMessages.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">No notifications or messages from coordinators yet.</p>';
+                countBadge.innerText = '0 Unread';
+                return;
+            }
+
+            let unreadCount = 0;
+            let html = '';
+            [...myMessages].reverse().forEach((m, idx) => {
+                const msgId = m.id || `local_${m.timestamp}_${idx}`;
+                const isRead = readIds.includes(msgId);
+                if (!isRead) unreadCount++;
+
+                const badgeType = m.target === 'individual'
+                    ? '<span class="bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded font-bold">Direct Message</span>'
+                    : '<span class="bg-sky-500/20 text-sky-300 text-[10px] px-2 py-0.5 rounded font-bold">Batch Broadcast</span>';
+
+                html += `<div class="bg-slate-950 border ${isRead ? 'border-slate-800' : 'border-emerald-500/50'} rounded-xl p-3.5 space-y-2 transition">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            ${!isRead ? '<span class="w-2 h-2 rounded-full bg-emerald-400"></span>' : ''}
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">${escapeHtml(m.notifType || 'Official Notice')}</span>
+                        </div>
+                        ${badgeType}
+                    </div>
+                    <h4 class="font-bold text-xs sm:text-sm text-white">${escapeHtml(m.title)}</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed whitespace-pre-line">${escapeHtml(m.body)}</p>
+                    <div class="flex items-center justify-between pt-1">
+                        <p class="text-[10px] text-slate-500 font-mono">${escapeHtml(m.timestamp)}</p>
+                        ${!isRead
+                            ? `<button type="button" onclick="markNotificationRead('${escapeHtml(msgId)}')" class="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 underline cursor-pointer">Mark as Read</button>`
+                            : `<span class="text-[10px] text-slate-500">Read ✓</span>`}
+                    </div>
+                </div>`;
+            });
+
+            countBadge.innerText = `${unreadCount} Unread (${myMessages.length} Total)`;
+            container.innerHTML = html;
+        }
+
+        async function loadApplicantBookings() {
+            if (!currentPhoneKey) return;
+            let bookingsList = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+
+            if (window.firebaseReady && window.db) {
+                try {
+                    const snap = await window.getDocs(window.collection(window.db, "bookings"));
+                    const fsBooks = [];
+                    snap.forEach(docSnap => fsBooks.push({ id: docSnap.id, ...docSnap.data() }));
+                    bookingsList = fsBooks;
+                    localStorage.setItem('ag_bookings', JSON.stringify(bookingsList));
+                } catch (err) {}
+            }
+
+            const myBookings = bookingsList.filter(b => b.phoneKey === currentPhoneKey);
+            let html = '';
+            myBookings.forEach(b => {
+                const statusBadge = b.confirmed 
+                    ? `<span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded text-[10px] font-bold">Confirmed ✓</span>` 
+                    : `<span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold">Pending Approval</span>`;
+                
+                html += `<tr>
+                    <td class="p-3 font-semibold text-white">${escapeHtml(b.subject)}<br><span class="text-slate-400 text-[11px]">${escapeHtml(b.plan)}</span></td>
+                    <td class="p-3 text-slate-300">${escapeHtml(b.days)}<br><span class="text-emerald-400 text-[11px]">${escapeHtml(b.slots)}</span></td>
+                    <td class="p-3 font-mono text-white">${escapeHtml(b.fee)}<br><span class="text-amber-300 text-[10px]">TxID: ${escapeHtml(b.momoTx)}</span></td>
+                    <td class="p-3">${statusBadge}</td>
+                </tr>`;
+            });
+
+            const tbody = document.getElementById('applicant-bookings-table-body');
+            if (tbody) tbody.innerHTML = html || '<tr><td colspan="4" class="p-4 text-center text-slate-500">No bookings submitted yet. Complete Step 2 & 3 below.</td></tr>';
+        }
+
+        function switchTab(tabId) {
+            const tabIds = ['home', 'syllabus', 'portal', 'ai', 'admin'];
+            tabIds.forEach(t => {
+                const pane = document.getElementById('tab-' + t);
+                const btn = document.getElementById('nav-' + t);
+                if (pane) pane.classList.add('hidden');
+                if (btn) {
+                    btn.className = "tab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5 shrink-0 cursor-pointer";
+                }
+            });
+
+            const targetPane = document.getElementById('tab-' + tabId);
+            const activeBtn = document.getElementById('nav-' + tabId);
+
+            if (targetPane) targetPane.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.className = "tab-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white transition flex items-center gap-1.5 shadow shrink-0 cursor-pointer";
+            }
+
+            safeCreateIcons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setSubject(sub) {
+            bookingState.subject = sub;
+            document.querySelectorAll('.subj-btn').forEach(b => {
+                b.className = "subj-btn p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 font-bold text-xs text-center transition cursor-pointer";
+            });
+            if (sub === 'Biology (P530)') document.getElementById('sub-bio').className = "subj-btn p-3 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-bold text-xs text-center transition cursor-pointer";
+            if (sub === 'Chemistry (P525)') document.getElementById('sub-chem').className = "subj-btn p-3 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-bold text-xs text-center transition cursor-pointer";
+            if (sub === 'Both Bio & Chem') document.getElementById('sub-both').className = "subj-btn p-3 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-bold text-xs text-center transition cursor-pointer";
+            updateSummary();
+        }
+
+        function setPlan(plan) {
+            bookingState.plan = plan;
+            document.querySelectorAll('.plan-card').forEach(c => {
+                c.className = "plan-card p-4 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition";
+            });
+            if (plan === 'daily') {
+                document.getElementById('plan-daily').className = "plan-card p-4 rounded-xl border border-emerald-500 bg-emerald-500/10 cursor-pointer transition";
+                document.getElementById('daily-days-box').classList.remove('hidden');
+            } else {
+                document.getElementById('plan-weekly').className = "plan-card p-4 rounded-xl border border-emerald-500 bg-emerald-500/10 cursor-pointer transition";
+                document.getElementById('daily-days-box').classList.add('hidden');
+                bookingState.days = [];
+                document.querySelectorAll('.day-btn').forEach(b => {
+                    b.className = "day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer";
+                });
+            }
+            updateSummary();
+        }
+
+        function toggleDay(day, btnElem) {
+            const idx = bookingState.days.indexOf(day);
+            if (idx > -1) {
+                bookingState.days.splice(idx, 1);
+                btnElem.className = "day-btn p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs text-slate-300 font-semibold transition cursor-pointer";
+            } else {
+                bookingState.days.push(day);
+                btnElem.className = "day-btn p-2.5 rounded-lg border border-emerald-500 bg-emerald-500/10 text-emerald-300 font-semibold transition cursor-pointer";
+            }
+            updateSummary();
+        }
+
+        function toggleSlot(slot, cardElem) {
+            const idx = bookingState.slots.indexOf(slot);
+            if (idx > -1) {
+                bookingState.slots.splice(idx, 1);
+                cardElem.className = "slot-card p-3 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer transition";
+            } else {
+                if (bookingState.slots.length >= 2) {
+                    showToast("Maximum of 2 time slots allowed per booking. Unselect a slot to choose another.", "error");
+                    return;
+                }
+                bookingState.slots.push(slot);
+                cardElem.className = "slot-card p-3 rounded-xl border border-emerald-500 bg-emerald-500/10 cursor-pointer transition";
+            }
+            updateSummary();
+        }
+
+        function calculateCurrentFee() {
+            let fee = bookingState.plan === 'weekly' ? 9000 : (Math.max(1, bookingState.days.length) * 1500);
+            if (bookingState.subject === 'Both Bio & Chem') fee *= 2;
+            return fee;
+        }
+
+        function updateSummary() {
+            const sumSub = document.getElementById('summary-subject');
+            const sumPlan = document.getElementById('summary-plan');
+            const sumFee = document.getElementById('summary-fee');
+            const sumSlots = document.getElementById('summary-slots');
+
+            if (sumSub) sumSub.innerText = bookingState.subject;
+            let fee = calculateCurrentFee();
+            let planText = bookingState.plan === 'weekly' ? "Weekly Pass (Mon–Sat)" : `Daily Pass (${bookingState.days.length} day${bookingState.days.length > 1 ? 's' : ''})`;
+            if (sumPlan) sumPlan.innerText = planText;
+            if (sumFee) sumFee.innerText = `UGX ${fee.toLocaleString()}`;
+            if (sumSlots) sumSlots.innerText = bookingState.slots.length > 0 ? bookingState.slots.join(', ') : 'None selected';
+            updateUssdPaymentLinks();
+        }
+
+        function syncPaymentCoordinator() {
+            const coordinator = document.getElementById('target-coordinator').value;
+            const btn1 = document.getElementById('ussd-btn-1');
+            const btn2 = document.getElementById('ussd-btn-2');
+            const text1 = document.getElementById('ussd-text-1');
+            const text2 = document.getElementById('ussd-text-2');
+            let fee = calculateCurrentFee();
+
+            if (coordinator === '256751341896') {
+                if (btn1) btn1.className = "ussd-pay-btn bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between shadow cursor-pointer opacity-100";
+                if (text1) text1.innerText = `*185*1*100*1*0751341896*1*${fee}#`;
+
+                if (btn2) btn2.className = "ussd-pay-btn bg-slate-800 text-slate-500 font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between opacity-50 cursor-not-allowed";
+                if (text2) text2.innerText = "Locked (Select Tr. Hamdan)";
+            } else {
+                if (btn1) btn1.className = "ussd-pay-btn bg-slate-800 text-slate-500 font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between opacity-50 cursor-not-allowed";
+                if (text1) text1.innerText = "Locked (Select Tr. Surgeon)";
+
+                if (btn2) btn2.className = "ussd-pay-btn bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-4 rounded-xl text-xs transition flex items-center justify-between shadow cursor-pointer opacity-100";
+                if (text2) text2.innerText = `*185*1*100*1*0759203256*1*${fee}#`;
+            }
+            updateUssdPaymentLinks();
+        }
+
+        function updateUssdPaymentLinks() {
+            let fee = calculateCurrentFee();
+            const coordinator = document.getElementById('target-coordinator').value;
+
+            const ussd1 = `tel:*185*1*100*1*0751341896*1*${fee}%23`;
+            const ussd2 = `tel:*185*1*100*1*0759203256*1*${fee}%23`;
+
+            const btn1 = document.getElementById('ussd-btn-1');
+            const btn2 = document.getElementById('ussd-btn-2');
+            if (btn1) btn1.href = coordinator === '256751341896' ? ussd1 : '#';
+            if (btn2) btn2.href = coordinator === '256759203256' ? ussd2 : '#';
+            
+            const text1 = document.getElementById('ussd-text-1');
+            const text2 = document.getElementById('ussd-text-2');
+            if (coordinator === '256751341896' && text1) {
+                text1.innerText = `*185*1*100*1*0751341896*1*${fee}#`;
+            } else if (text2) {
+                text2.innerText = `*185*1*100*1*0759203256*1*${fee}#`;
+            }
+        }
+
+        function handleDialPayment(number, event) {
+            const coordinator = document.getElementById('target-coordinator').value;
+            if (coordinator !== number) {
+                event.preventDefault();
+                showToast("Strict Error: You cannot pay on a number that does not match your chosen WhatsApp booking coordinator!", "error");
+                return false;
+            }
+            showToast("Redirecting to phone dialer with USSD code. Insert your PIN and confirm payment.");
+        }
+
+        async function submitBooking() {
+            if (bookingState.slots.length === 0) {
+                showToast("Please select at least 1 time slot before booking.", "error");
+                return;
+            }
+            if (bookingState.plan === 'daily' && bookingState.days.length === 0) {
+                showToast("Please select at least 1 day for your Daily Pass.", "error");
+                return;
+            }
+
+            const target = document.getElementById('target-coordinator').value;
+            const momoTx = document.getElementById('momo-tx').value.trim();
+            if (!momoTx) {
+                showToast("Mandatory Error: Please note down and enter your Transaction ID before dispatching!", "error");
+                document.getElementById('momo-tx').focus();
+                return;
+            }
+
+            let fee = calculateCurrentFee();
+
+            const daysStr = bookingState.plan === 'weekly' ? 'Mon–Sat (Full Week)' : bookingState.days.join(', ');
+            const planLabel = bookingState.plan === 'weekly' ? 'Weekly Pass (Mon–Sat)' : `Daily Pass (${bookingState.days.length} Day${bookingState.days.length > 1 ? 's' : ''})`;
+            const programName = "ACADEMIC GIANTS HOLIDAY STUDY & REVISION PROGRAM";
+            const amountFormatted = `UGX ${fee.toLocaleString()}`;
+            const studyTimeFormatted = bookingState.slots.join(' & ');
+
+            const bookingData = {
+                program: programName,
+                student: currentUser.name,
+                class: currentUser.cls,
+                phone: currentUser.phone,
+                phoneKey: currentUser.phoneKey,
+                school: currentUser.school,
+                subject: bookingState.subject,
+                plan: planLabel,
+                days: daysStr,
+                slots: studyTimeFormatted,
+                fee: amountFormatted,
+                momoTx,
+                coordinator: target === '256751341896' ? 'Tr. Surgeon (0751341896 - Sembusi Muhamad)' : 'Tr. Hamdan (0759203256 - Nkwanga Hamudan)',
+                confirmed: false,
+                timestamp: new Date().toLocaleString()
+            };
+
+            if (window.firebaseReady && window.db) {
+                try {
+                    const docRef = await window.addDoc(window.collection(window.db, "bookings"), bookingData);
+                    bookingData.id = docRef.id;
+                } catch (err) {}
+            }
+
+            const localBookings = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+            localBookings.push(bookingData);
+            localStorage.setItem('ag_bookings', JSON.stringify(localBookings));
+
+            loadApplicantBookings();
+
+            const rawMessage = 
+`*${programName}*
+━━━━━━━━━━━━━━━━━━━━━━
+👤 *Name of Applicant:* ${currentUser.name}
+🏫 *Class & School:* ${currentUser.cls} | ${currentUser.school}
+📞 *Phone:* ${currentUser.phone}
+📚 *Subject(s) Chosen:* ${bookingState.subject}
+⏳ *Session & Plan:* ${planLabel} (${daysStr})
+⏰ *Times Chosen:* ${studyTimeFormatted}
+💵 *Amount Paid:* ${amountFormatted}
+🧾 *Transaction ID:* ${momoTx}
+━━━━━━━━━━━━━━━━━━━━━━
+_Academic Giants Family • Embrace the Holiday Study_`;
+
+            const encodedMsg = encodeURIComponent(rawMessage);
+
+            showToast("Opening WhatsApp with your booking details...");
+            window.location.href = `https://wa.me/${target}?text=${encodedMsg}`;
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        async function loadAdminData() {
+            let loginsList = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+            let bookingsList = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+
+            updateActiveAdminCount();
+
+            if (window.firebaseReady && window.db) {
+                try {
+                    const loginsSnap = await window.getDocs(window.collection(window.db, "login_logs"));
+                    const fsLogins = [];
+                    loginsSnap.forEach(docSnap => fsLogins.push({ id: docSnap.id, ...docSnap.data() }));
+                    loginsList = fsLogins;
+                    localStorage.setItem('ag_all_learners', JSON.stringify(loginsList));
+
+                    const bookSnap = await window.getDocs(window.collection(window.db, "bookings"));
+                    const fsBookings = [];
+                    bookSnap.forEach(docSnap => fsBookings.push({ id: docSnap.id, ...docSnap.data() }));
+                    bookingsList = fsBookings;
+                    localStorage.setItem('ag_bookings', JSON.stringify(bookingsList));
+                } catch (err) {}
+            }
+
+            cachedAdminLearners = loginsList;
+            cachedAdminBookings = bookingsList;
+
+            const studentSelect = document.getElementById('admin-target-student');
+            if (studentSelect) {
+                let studentOpts = '<option value="">-- Choose Learner --</option>';
+                loginsList.forEach(l => {
+                    studentOpts += `<option value="${l.phoneKey}">${escapeHtml(l.name)} (${escapeHtml(l.cls)} - ${escapeHtml(l.phone)})</option>`;
+                });
+                studentSelect.innerHTML = studentOpts;
+            }
+
+            let loginsHtml = '';
+            loginsList.forEach((d, index) => {
+                const statusBadge = d.confirmed 
+                    ? `<span class="bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-md text-[10px] font-bold">Confirmed ✓</span>` 
+                    : `<span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-md text-[10px] font-bold">Pending</span>`;
+                
+                loginsHtml += `<tr>
+                    <td class="p-3 font-semibold text-white">${escapeHtml(d.name)}</td>
+                    <td class="p-3">${escapeHtml(d.cls)} <br><span class="text-slate-400 text-[11px]">${escapeHtml(d.school || '')}</span></td>
+                    <td class="p-3 font-mono">${escapeHtml(d.phone)}</td>
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
+                        <button type="button" onclick="quickSelectLearnerForMessage('${escapeHtml(d.phoneKey)}')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-sky-600/20 hover:bg-sky-600/40 text-sky-300 border border-sky-500/30 transition cursor-pointer">
+                            Message
+                        </button>
+                        <button type="button" onclick="adminToggleConfirmLearner(${index}, ${!d.confirmed})" class="px-2.5 py-1.5 rounded-lg text-xs font-bold ${d.confirmed ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} transition cursor-pointer">
+                            ${d.confirmed ? 'Unconfirm' : 'Confirm'}
+                        </button>
+                        <button type="button" onclick="adminDeleteLearner(${index}, this)" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 transition cursor-pointer">
+                            Delete
+                        </button>
+                    </td>
+                </tr>`;
+            });
+            const loginsTableBody = document.getElementById('logins-table-body');
+            if (loginsTableBody) loginsTableBody.innerHTML = loginsHtml || '<tr><td colspan="5" class="p-4 text-center text-slate-500">No learner records found.</td></tr>';
+            const statLogins = document.getElementById('stat-logins');
+            if (statLogins) statLogins.innerText = loginsList.length;
+
+            let bookHtml = '';
+            bookingsList.forEach((d, index) => {
+                const statusBadge = d.confirmed 
+                    ? `<span class="bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-md text-[10px] font-bold">Confirmed ✓</span>` 
+                    : `<span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-md text-[10px] font-bold">Pending</span>`;
+
+                bookHtml += `<tr>
+                    <td class="p-3 font-semibold text-white">${escapeHtml(d.student)} <br><span class="text-slate-400 text-[11px] font-mono">${escapeHtml(d.phone)}</span></td>
+                    <td class="p-3 text-emerald-400">${escapeHtml(d.subject)} <br><span class="text-slate-300 text-[11px]">${escapeHtml(d.plan)}</span></td>
+                    <td class="p-3 font-mono font-bold text-white">${escapeHtml(d.fee)} <br><span class="text-amber-300 text-[10px]">TxID: ${escapeHtml(d.momoTx)}</span></td>
+                    <td class="p-3 text-emerald-300">${escapeHtml(d.coordinator)} <br>${statusBadge}</td>
+                    <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
+                        <button type="button" onclick="adminToggleConfirmBooking(${index}, ${!d.confirmed})" class="px-2.5 py-1.5 rounded-lg text-xs font-bold ${d.confirmed ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} transition cursor-pointer">
+                            ${d.confirmed ? 'Unconfirm' : 'Confirm'}
+                        </button>
+                        <button type="button" onclick="adminDeleteBooking(${index}, this)" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 transition cursor-pointer">
+                            Delete
+                        </button>
+                    </td>
+                </tr>`;
+            });
+            const bookingsTableBody = document.getElementById('bookings-table-body');
+            if (bookingsTableBody) bookingsTableBody.innerHTML = bookHtml || '<tr><td colspan="5" class="p-4 text-center text-slate-500">No bookings found.</td></tr>';
+            const statBookings = document.getElementById('stat-bookings');
+            if (statBookings) statBookings.innerText = bookingsList.length;
+        }
+
+        function toggleAdminTargetSelect() {
+            const target = document.getElementById('admin-msg-target').value;
+            const indBox = document.getElementById('admin-individual-select-box');
+            if (indBox) {
+                if (target === 'individual') {
+                    indBox.classList.remove('hidden');
+                } else {
+                    indBox.classList.add('hidden');
+                }
+            }
+        }
+
+        function quickSelectLearnerForMessage(phoneKey) {
+            const targetSelect = document.getElementById('admin-msg-target');
+            const studentSelect = document.getElementById('admin-target-student');
+            if (targetSelect && studentSelect) {
+                targetSelect.value = 'individual';
+                toggleAdminTargetSelect();
+                studentSelect.value = phoneKey;
+                const panel = document.getElementById('admin-messaging-panel');
+                if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const msgTitle = document.getElementById('admin-msg-title');
+                if (msgTitle) msgTitle.focus();
+            }
+        }
+
+        async function sendAdminNotification() {
+            const target = document.getElementById('admin-msg-target').value;
+            const notifType = document.getElementById('admin-msg-type').value;
+            const title = document.getElementById('admin-msg-title').value.trim();
+            const body = document.getElementById('admin-msg-body').value.trim();
+            const targetPhoneKey = document.getElementById('admin-target-student').value;
+
+            if (!title || !body) {
+                showToast("Please provide both a notification title and message body.", "error");
+                return;
+            }
+            if (target === 'individual' && !targetPhoneKey) {
+                showToast("Please select a specific learner account for the individual message.", "error");
+                return;
+            }
+
+            const newMsg = {
+                id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+                target,
+                notifType,
+                targetPhoneKey: target === 'individual' ? targetPhoneKey : null,
+                title,
+                body,
+                timestamp: new Date().toLocaleString()
+            };
+
+            if (window.firebaseReady && window.db && window.addDoc) {
+                try {
+                    const ref = await window.addDoc(window.collection(window.db, "learner_notifications"), newMsg);
+                    newMsg.id = ref.id;
+                } catch (err) {}
+            }
+
+            let messagesList = JSON.parse(localStorage.getItem('ag_notifications') || '[]');
+            messagesList.push(newMsg);
+            localStorage.setItem('ag_notifications', JSON.stringify(messagesList));
+
+            document.getElementById('admin-msg-title').value = '';
+            document.getElementById('admin-msg-body').value = '';
+            if (currentUser) loadLearnerInbox();
+            showToast(`Secure ${target === 'individual' ? 'individual direct' : 'batch broadcast'} notification sent!`);
+        }
+
+        async function adminToggleConfirmLearner(index, confirmState) {
+            const targetItem = cachedAdminLearners[index];
+            if (!targetItem) return;
+
+            if (window.firebaseReady && window.db) {
+                try {
+                    if (targetItem.id) {
+                        await window.updateDoc(window.doc(window.db, "login_logs", targetItem.id), { confirmed: confirmState });
+                    } else if (targetItem.phoneKey) {
+                        const snap = await window.getDocs(window.collection(window.db, "login_logs"));
+                        for (const docSnap of snap.docs) {
+                            if (docSnap.data().phoneKey === targetItem.phoneKey) {
+                                await window.updateDoc(window.doc(window.db, "login_logs", docSnap.id), { confirmed: confirmState });
+                            }
+                        }
+                    }
+                } catch (err) {
+                    showToast("Failed to update record in cloud database.", "error");
+                    return;
+                }
+            }
+
+            let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+            allLearners = allLearners.map(l => {
+                if ((targetItem.id && l.id === targetItem.id) || (targetItem.phoneKey && l.phoneKey === targetItem.phoneKey)) {
+                    l.confirmed = confirmState;
+                }
+                return l;
+            });
+            localStorage.setItem('ag_all_learners', JSON.stringify(allLearners));
+
+            if (currentUser && targetItem.phoneKey && currentUser.phoneKey === targetItem.phoneKey) {
+                currentUser.confirmed = confirmState;
+                localStorage.setItem('ag_student_session', JSON.stringify(currentUser));
+                applyLoggedInUI();
+            }
+
+            showToast(`Learner confirmation status updated to: ${confirmState ? 'Confirmed' : 'Pending'}`);
+            await loadAdminData();
+        }
+
+        async function adminDeleteLearner(index, btnElem) {
+            if (btnElem && btnElem.dataset.armed !== "true") {
+                btnElem.dataset.armed = "true";
+                btnElem.innerText = "Sure?";
+                btnElem.className = "px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white border border-rose-400 transition cursor-pointer";
+                setTimeout(() => {
+                    if (btnElem && btnElem.isConnected && btnElem.dataset.armed === "true") {
+                        btnElem.dataset.armed = "false";
+                        btnElem.innerText = "Delete";
+                        btnElem.className = "px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 transition cursor-pointer";
+                    }
+                }, 3500);
+                return;
+            }
+
+            const targetItem = cachedAdminLearners[index];
+            if (!targetItem) return;
+
+            if (btnElem) {
+                btnElem.disabled = true;
+                btnElem.innerText = "Deleting...";
+            }
+
+            if (window.firebaseReady && window.db) {
+                try {
+                    if (targetItem.id) {
+                        await window.deleteDoc(window.doc(window.db, "login_logs", targetItem.id));
+                    } else if (targetItem.phoneKey) {
+                        const snap = await window.getDocs(window.collection(window.db, "login_logs"));
+                        for (const docSnap of snap.docs) {
+                            if (docSnap.data().phoneKey === targetItem.phoneKey) {
+                                await window.deleteDoc(window.doc(window.db, "login_logs", docSnap.id));
+                            }
+                        }
+                    }
+                } catch (err) {
+                    showToast("Failed to delete record from cloud database.", "error");
+                    await loadAdminData();
+                    return;
+                }
+            }
+
+            let allLearners = JSON.parse(localStorage.getItem('ag_all_learners') || '[]');
+            allLearners = allLearners.filter((l, idx) => {
+                if (targetItem.id && l.id) return l.id !== targetItem.id;
+                if (targetItem.phoneKey && l.phoneKey) return l.phoneKey !== targetItem.phoneKey;
+                return idx !== index;
+            });
+            localStorage.setItem('ag_all_learners', JSON.stringify(allLearners));
+
+            showToast("Learner record permanently deleted.");
+            await loadAdminData();
+        }
+
+        async function adminToggleConfirmBooking(index, confirmState) {
+            const targetItem = cachedAdminBookings[index];
+            if (!targetItem) return;
+
+            if (window.firebaseReady && window.db) {
+                try {
+                    if (targetItem.id) {
+                        await window.updateDoc(window.doc(window.db, "bookings", targetItem.id), { confirmed: confirmState });
+                    } else {
+                        const snap = await window.getDocs(window.collection(window.db, "bookings"));
+                        for (const docSnap of snap.docs) {
+                            const d = docSnap.data();
+                            if (d.momoTx === targetItem.momoTx && d.phoneKey === targetItem.phoneKey && d.timestamp === targetItem.timestamp) {
+                                await window.updateDoc(window.doc(window.db, "bookings", docSnap.id), { confirmed: confirmState });
+                            }
+                        }
+                    }
+                } catch (err) {
+                    showToast("Failed to update booking in cloud database.", "error");
+                    return;
+                }
+            }
+
+            let bookingsList = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+            if (bookingsList[index]) {
+                bookingsList[index].confirmed = confirmState;
+                localStorage.setItem('ag_bookings', JSON.stringify(bookingsList));
+            }
+
+            showToast(`Booking status updated to: ${confirmState ? 'Confirmed' : 'Pending'}`);
+            await loadAdminData();
+            loadApplicantBookings();
+        }
+
+        async function adminDeleteBooking(index, btnElem) {
+            if (btnElem && btnElem.dataset.armed !== "true") {
+                btnElem.dataset.armed = "true";
+                btnElem.innerText = "Sure?";
+                btnElem.className = "px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white border border-rose-400 transition cursor-pointer";
+                setTimeout(() => {
+                    if (btnElem && btnElem.isConnected && btnElem.dataset.armed === "true") {
+                        btnElem.dataset.armed = "false";
+                        btnElem.innerText = "Delete";
+                        btnElem.className = "px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 transition cursor-pointer";
+                    }
+                }, 3500);
+                return;
+            }
+
+            const targetItem = cachedAdminBookings[index];
+            if (!targetItem) return;
+
+            if (btnElem) {
+                btnElem.disabled = true;
+                btnElem.innerText = "Deleting...";
+            }
+
+            if (window.firebaseReady && window.db) {
+                try {
+                    if (targetItem.id) {
+                        await window.deleteDoc(window.doc(window.db, "bookings", targetItem.id));
+                    } else {
+                        const snap = await window.getDocs(window.collection(window.db, "bookings"));
+                        for (const docSnap of snap.docs) {
+                            const d = docSnap.data();
+                            if (d.momoTx === targetItem.momoTx && d.phoneKey === targetItem.phoneKey && d.timestamp === targetItem.timestamp) {
+                                await window.deleteDoc(window.doc(window.db, "bookings", docSnap.id));
+                            }
+                        }
+                    }
+                } catch (err) {
+                    showToast("Failed to delete booking from cloud database.", "error");
+                    await loadAdminData();
+                    return;
+                }
+            }
+
+            let bookingsList = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+            bookingsList = bookingsList.filter((b, idx) => {
+                if (targetItem.id && b.id) return b.id !== targetItem.id;
+                return idx !== index;
+            });
+            localStorage.setItem('ag_bookings', JSON.stringify(bookingsList));
+
+            showToast("Booking permanently deleted.");
+            await loadAdminData();
+            loadApplicantBookings();
+        }
+    </script>
+</body>
+</html>
