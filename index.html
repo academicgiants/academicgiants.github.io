@@ -2749,7 +2749,7 @@ _Academic Giants Platform • Embrace the Holiday Study_`;
             await loadAdminData();
             loadApplicantBookings();
         }
-    </async function verifyAdmin() {
+    async function verifyAdmin() {
     const inputVal = document.getElementById('admin-pin').value.trim();
     if (!inputVal) {
         showToast("Please enter the admin PIN.", "error");
