@@ -2749,53 +2749,6 @@ _Academic Giants Platform • Embrace the Holiday Study_`;
             await loadAdminData();
             loadApplicantBookings();
         }
-    async function verifyAdmin() {
-    const inputVal = document.getElementById('admin-pin-input').value.trim();
-    if (!inputVal) {
-        showToast("Please enter the admin PIN.", "error");
-        return;
-    }
-
-    let authorized = false;
-
-    if (window.firebaseReady && window.db) {
-        try {
-            const snap = await window.db.collection('admins').get();
-            snap.forEach(docSnap => {
-                const data = docSnap.data();
-                if (data.pin && String(data.pin).trim() === String(inputVal)) {
-                    authorized = true;
-                }
-            });
-        } catch (err) {
-            console.error("Firestore verification error:", err);
-        }
-    }
-
-    if (authorized) {
-        adminAuthorized = true;
-        isSuperAdmin = false;
-
-        const subTitle = document.getElementById('admin-subtitle');
-        if (subTitle) subTitle.innerText = "Coordinator Mode";
-        const superCard = document.getElementById('super-admin-card');
-        if (superCard) superCard.classList.add('hidden');
-        const bossBtn = document.getElementById('boss-mode-btn');
-        if (bossBtn) bossBtn.classList.add('hidden');
-
-        showToast("Coordinator admin access granted!", "success");
-
-        if (typeof registerAdminPresence === 'function') {
-            await registerAdminPresence(true);
-        }
-        if (typeof adminHeartbeatInterval !== 'undefined' && adminHeartbeatInterval) clearInterval(adminHeartbeatInterval);
-        
-        loadAdminData();
-        safeCreateIcons();
-    } else {
-        showToast("Incorrect admin PIN.", "error");
-    }
-}
-    </script>    
+    </script>
 </body>
 </html>
